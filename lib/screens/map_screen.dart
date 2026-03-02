@@ -5,6 +5,11 @@ import '../providers/app_provider.dart';
 import '../models/restaurant.dart';
 import '../widgets/restaurant_card.dart';
 
+/// Screen displaying restaurants on an interactive Google Map.
+///
+/// Shows markers for all recommended restaurants and the user's location.
+/// Includes a horizontal PageView carousel at the bottom for quick browsing.
+/// Tapping a marker shows restaurant details in a bottom sheet.
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -13,7 +18,10 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  /// Controller for the Google Map widget.
   GoogleMapController? _mapController;
+
+  /// Set of markers displayed on the map.
   Set<Marker> _markers = {};
 
   @override
@@ -22,10 +30,15 @@ class _MapScreenState extends State<MapScreen> {
     _buildMarkers();
   }
 
+  /// Creates map markers for all restaurants and user location.
+  ///
+  /// Restaurant markers show name and rating in info window.
+  /// User location marker is blue to distinguish from restaurants.
   void _buildMarkers() {
     final provider = Provider.of<AppProvider>(context, listen: false);
     final restaurants = provider.restaurants;
 
+    // Create markers for each restaurant
     _markers = restaurants.map((restaurant) {
       return Marker(
         markerId: MarkerId(restaurant.id),
@@ -43,7 +56,7 @@ class _MapScreenState extends State<MapScreen> {
       );
     }).toSet();
 
-    // Add current location marker
+    // Add current location marker if available
     if (provider.currentPosition != null) {
       _markers.add(
         Marker(
@@ -66,17 +79,20 @@ class _MapScreenState extends State<MapScreen> {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
         final isKorean = provider.locale.languageCode == 'ko';
+
+        // Default to Seoul if no location available
         final initialPosition = provider.currentPosition != null
             ? LatLng(
                 provider.currentPosition!.latitude,
                 provider.currentPosition!.longitude,
               )
-            : const LatLng(37.5665, 126.9780); // Seoul as default
+            : const LatLng(37.5665, 126.9780);
 
         return Scaffold(
           appBar: AppBar(
             title: Text(isKorean ? '지도' : 'Map'),
             actions: [
+              // Button to recenter on user location
               IconButton(
                 icon: const Icon(Icons.my_location),
                 onPressed: () {
@@ -96,6 +112,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           body: Stack(
             children: [
+              // Google Map widget
               GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: initialPosition,
@@ -103,13 +120,15 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 markers: _markers,
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: false, // Using custom button in AppBar
                 zoomControlsEnabled: true,
                 mapToolbarEnabled: false,
                 onMapCreated: (controller) {
                   _mapController = controller;
                 },
               ),
+
+              // Restaurant carousel at bottom
               if (provider.restaurants.isNotEmpty)
                 Positioned(
                   left: 0,
@@ -121,6 +140,7 @@ class _MapScreenState extends State<MapScreen> {
                       itemCount: provider.restaurants.length,
                       controller: PageController(viewportFraction: 0.9),
                       onPageChanged: (index) {
+                        // Pan map to selected restaurant
                         final restaurant = provider.restaurants[index];
                         _mapController?.animateCamera(
                           CameraUpdate.newLatLng(
@@ -151,6 +171,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Shows a bottom sheet with full restaurant details.
   void _showRestaurantBottomSheet(BuildContext context, Restaurant restaurant) {
     showModalBottomSheet(
       context: context,

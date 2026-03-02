@@ -245,6 +245,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// Quick selection widget for choosing restaurants based on mood and cuisine.
+///
+/// Provides an interactive interface with:
+/// - Mood selection chips (hungry, light meal, special occasion, etc.)
+/// - Cuisine type selection chips with icons
+/// - "Spin the Wheel" feature for random cuisine selection
+/// - "Shake to Surprise" feature using device accelerometer
+/// - Direct search functionality with AI-powered recommendations
 class QuickSelectWidget extends StatefulWidget {
   const QuickSelectWidget({super.key});
 
@@ -253,9 +261,13 @@ class QuickSelectWidget extends StatefulWidget {
 }
 
 class _QuickSelectWidgetState extends State<QuickSelectWidget> {
+  /// Currently selected mood (null if none selected).
   String? _selectedMood;
+
+  /// Set of selected cuisine types (supports multiple selection).
   final Set<String> _selectedCuisines = {};
 
+  /// Available mood options: (English name, Korean name, description for AI query).
   static const List<(String, String, String)> _moods = [
     ('Hungry', '배고파요', 'I\'m really hungry, need something filling'),
     ('Light Meal', '가볍게', 'Looking for something light'),
@@ -264,6 +276,8 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     ('Group', '모임', 'Good for a group'),
   ];
 
+  /// Available cuisine options: (English name, Korean name, icon).
+  /// Also used by the spin wheel for random selection.
   static const List<(String, String, IconData)> _cuisines = [
     ('Korean', '한식', Icons.rice_bowl),
     ('Japanese', '일식', Icons.set_meal),
@@ -278,6 +292,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     ('Desserts', '디저트', Icons.icecream),
   ];
 
+  /// Opens the detailed filter bottom sheet for advanced filtering options.
   void _showFilterSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -289,6 +304,11 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  /// Displays the spin wheel modal for random cuisine selection.
+  ///
+  /// Creates [SpinWheelItem]s from the cuisine list and shows them
+  /// in a modal bottom sheet. When the wheel stops, the selected
+  /// cuisine is set and a snackbar prompts the user to search.
   void _showSpinWheel(BuildContext context, AppProvider provider, bool isKorean) {
     final wheelItems = _cuisines.asMap().entries.map((entry) {
       final index = entry.key;
@@ -374,16 +394,21 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  /// Builds and sends a search query based on current selections.
+  ///
+  /// Combines selected mood and cuisine types into a natural language
+  /// query that is sent to the AI for restaurant recommendations.
+  /// If no selections are made, sends a generic recommendation request.
   void _findRestaurants(AppProvider provider, bool isKorean) {
     final List<String> queryParts = [];
 
-    // Add mood to query
+    // Add mood description to query (uses detailed English description or Korean name)
     if (_selectedMood != null) {
       final mood = _moods.firstWhere((m) => m.$1 == _selectedMood);
       queryParts.add(isKorean ? mood.$2 : mood.$3);
     }
 
-    // Add cuisines to query
+    // Add selected cuisine types to query
     if (_selectedCuisines.isNotEmpty) {
       final cuisineNames = _selectedCuisines.map((c) {
         final cuisine = _cuisines.firstWhere((cu) => cu.$1 == c);
@@ -394,7 +419,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
           : '$cuisineNames food');
     }
 
-    // Build final query
+    // Build final query - defaults to generic recommendation if nothing selected
     String query;
     if (queryParts.isEmpty) {
       query = isKorean ? '주변 맛집 추천해줘' : 'Recommend nearby restaurants';
@@ -407,6 +432,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     provider.sendMessage(query);
   }
 
+  /// Resets all mood and cuisine selections to their initial state.
   void _clearSelections() {
     setState(() {
       _selectedMood = null;
@@ -414,11 +440,16 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     });
   }
 
+  /// Handles device shake gesture for random cuisine selection.
+  ///
+  /// Picks a random cuisine from the available list, updates the selection,
+  /// and shows a snackbar with an option to search for restaurants.
+  /// Does nothing if a search is already in progress.
   void _onShake(BuildContext context, AppProvider provider, bool isKorean) {
     // Prevent triggering while already loading
     if (provider.isLoading) return;
 
-    // Pick a random cuisine
+    // Pick a random cuisine from the list
     final random = Random();
     final randomCuisine = _cuisines[random.nextInt(_cuisines.length)];
     final cuisineName = isKorean ? randomCuisine.$2 : randomCuisine.$1;
@@ -657,6 +688,10 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  /// Builds the mood selection chips row.
+  ///
+  /// Only one mood can be selected at a time (single selection).
+  /// Tapping an already-selected chip deselects it.
   Widget _buildMoodChips(bool isKorean) {
     return Wrap(
       spacing: 8,
@@ -676,6 +711,10 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  /// Builds the cuisine selection chips with icons.
+  ///
+  /// Supports multiple selection - users can select multiple cuisines.
+  /// Each chip displays a cuisine-appropriate icon.
   Widget _buildCuisineChips(bool isKorean) {
     return Wrap(
       spacing: 8,
@@ -700,6 +739,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  /// Builds the loading indicator section shown while AI searches.
   Widget _buildLoadingSection(BuildContext context, bool isKorean) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 48),

@@ -3,19 +3,33 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/restaurant.dart';
 
+/// Service for interacting with Google Places API.
+///
+/// Provides methods to search for restaurants, get place details,
+/// and retrieve photos. Uses singleton pattern for shared instance.
 class PlacesService {
   static final PlacesService _instance = PlacesService._internal();
   factory PlacesService() => _instance;
   PlacesService._internal();
 
+  /// API key loaded from environment variables.
   String get _apiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
+  /// Base URL for Google Places API endpoints.
   static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
+  /// Searches for restaurants near a given location.
+  ///
+  /// [latitude] and [longitude] specify the search center.
+  /// [radius] is the search radius in meters (default 1500m).
+  /// [keyword] optionally filters results by text search.
+  ///
+  /// Returns a list of [Restaurant] objects matching the criteria.
+  /// Throws an exception if the API key is not configured or the request fails.
   Future<List<Restaurant>> searchNearbyRestaurants({
     required double latitude,
     required double longitude,
-    int radius = 1500, // meters
+    int radius = 1500,
     String? keyword,
     String? type,
   }) async {
@@ -58,6 +72,13 @@ class PlacesService {
     }
   }
 
+  /// Searches for restaurants using a text query.
+  ///
+  /// More flexible than nearby search, allowing natural language queries
+  /// like "Italian restaurant" or "sushi near downtown".
+  ///
+  /// [query] is the search text.
+  /// [latitude], [longitude], and [radius] optionally bias results to an area.
   Future<List<Restaurant>> textSearchRestaurants({
     required String query,
     double? latitude,
@@ -74,6 +95,7 @@ class PlacesService {
       'key': _apiKey,
     };
 
+    // Add location bias if coordinates provided
     if (latitude != null && longitude != null) {
       params['location'] = '$latitude,$longitude';
       params['radius'] = radius.toString();
@@ -103,6 +125,12 @@ class PlacesService {
     }
   }
 
+  /// Fetches detailed information about a specific place.
+  ///
+  /// Returns more data than search results, including phone number,
+  /// website, opening hours, and photos.
+  ///
+  /// [placeId] is the unique Google Places identifier.
   Future<Restaurant?> getPlaceDetails(String placeId) async {
     if (_apiKey.isEmpty) {
       throw Exception('GOOGLE_MAPS_API_KEY not configured');
@@ -142,10 +170,18 @@ class PlacesService {
     }
   }
 
+  /// Generates a URL for a place photo.
+  ///
+  /// [photoReference] is the reference string from Places API.
+  /// [maxWidth] limits the image width (default 400px).
   String getPhotoUrl(String photoReference, {int maxWidth = 400}) {
     return '$_baseUrl/photo?maxwidth=$maxWidth&photo_reference=$photoReference&key=$_apiKey';
   }
 
+  /// Searches for nearby restaurants and returns raw JSON data.
+  ///
+  /// Used by the AI recommendation system to analyze restaurant data
+  /// before creating [Restaurant] objects with AI-generated reasons.
   Future<List<Map<String, dynamic>>> getNearbyRestaurantsRaw({
     required double latitude,
     required double longitude,

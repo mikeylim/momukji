@@ -1,19 +1,52 @@
+/// Data model representing a restaurant from Google Places API.
+///
+/// Contains all relevant information about a restaurant including
+/// location, ratings, pricing, and AI-generated recommendation reasons.
 class Restaurant {
+  /// Unique identifier from Google Places (place_id).
   final String id;
+
+  /// Display name of the restaurant.
   final String name;
+
+  /// Full formatted address.
   final String address;
+
+  /// Geographic latitude coordinate.
   final double latitude;
+
+  /// Geographic longitude coordinate.
   final double longitude;
+
+  /// Average user rating (1.0 - 5.0 scale).
   final double? rating;
+
+  /// Total number of user reviews.
   final int? userRatingsTotal;
+
+  /// Price level indicator (e.g., "$", "$$", "$$$").
   final String? priceLevel;
+
+  /// List of place types from Google Places API.
   final List<String> types;
+
+  /// URL for the restaurant's photo from Google Places.
   final String? photoUrl;
+
+  /// Whether the restaurant is currently open.
   final bool? isOpen;
+
+  /// Contact phone number.
   final String? phoneNumber;
+
+  /// Restaurant website URL.
   final String? website;
+
+  /// Weekly opening hours text.
   final List<String>? openingHours;
-  final String? aiReason; // Why AI recommended this
+
+  /// AI-generated explanation for why this restaurant was recommended.
+  final String? aiReason;
 
   Restaurant({
     required this.id,
@@ -33,6 +66,10 @@ class Restaurant {
     this.aiReason,
   });
 
+  /// Creates a Restaurant from Google Places API JSON response.
+  ///
+  /// Handles both nearby search and text search response formats,
+  /// extracting location from nested geometry object.
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     return Restaurant(
       id: json['place_id'] ?? json['id'] ?? '',
@@ -57,12 +94,14 @@ class Restaurant {
     );
   }
 
+  /// Converts numeric price level (0-4) to dollar sign representation.
   static String? _parsePriceLevel(dynamic level) {
     if (level == null) return null;
     int priceInt = level is int ? level : int.tryParse(level.toString()) ?? 0;
     return '\$' * (priceInt > 0 ? priceInt : 1);
   }
 
+  /// Converts this restaurant to a JSON map for serialization.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -83,6 +122,10 @@ class Restaurant {
     };
   }
 
+  /// Returns a formatted string of restaurant types for display.
+  ///
+  /// Filters out generic types like "point_of_interest" and "establishment",
+  /// replaces underscores with spaces, and limits to 3 types.
   String get typesDisplay {
     return types
         .where((t) => !t.contains('point_of_interest') && !t.contains('establishment'))

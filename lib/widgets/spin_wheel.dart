@@ -1,9 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+/// A customizable spinning wheel widget for random selection.
+///
+/// The wheel displays a list of [SpinWheelItem]s as colored segments.
+/// When tapped, it spins with a realistic deceleration animation and
+/// highlights the selected segment before returning the result.
 class SpinWheel extends StatefulWidget {
+  /// List of items to display on the wheel segments.
   final List<SpinWheelItem> items;
+
+  /// Callback function called when the wheel stops spinning.
+  /// Returns the selected [SpinWheelItem].
   final Function(SpinWheelItem) onResult;
+
+  /// Size of the wheel (width and height). Defaults to 300.
   final double size;
 
   const SpinWheel({
@@ -19,22 +30,37 @@ class SpinWheel extends StatefulWidget {
 
 class _SpinWheelState extends State<SpinWheel>
     with TickerProviderStateMixin {
+  // Animation controller for the spinning motion
   late AnimationController _spinController;
+
+  // Animation controller for the highlight effect after selection
   late AnimationController _highlightController;
+
   late Animation<double> _spinAnimation;
   late Animation<double> _highlightAnimation;
+
+  // Current rotation angle in radians
   double _currentRotation = 0;
+
+  // Whether the wheel is currently spinning
   bool _isSpinning = false;
+
+  // Index of the selected item (null until wheel stops)
   int? _selectedIndex;
+
   final Random _random = Random();
 
   @override
   void initState() {
     super.initState();
+
+    // Spin animation: 4 seconds with easeOutCubic for realistic deceleration
     _spinController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4000),
     );
+
+    // Highlight animation: 800ms pulse effect
     _highlightController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -54,6 +80,10 @@ class _SpinWheelState extends State<SpinWheel>
     super.dispose();
   }
 
+  /// Initiates the spin animation.
+  ///
+  /// Generates a random rotation amount (3-5 full rotations + random extra)
+  /// and animates the wheel with easeOutCubic curve for realistic deceleration.
   void _spin() {
     if (_isSpinning) return;
 
@@ -82,11 +112,14 @@ class _SpinWheelState extends State<SpinWheel>
     });
 
     _spinController.forward(from: 0).then((_) {
-      // Calculate which item was selected
+      // Calculate which segment is under the pointer
       final segmentAngle = 2 * pi / widget.items.length;
       final normalizedRotation = _currentRotation % (2 * pi);
       final n = widget.items.length;
 
+      // The wheel rotates clockwise (positive angle in Flutter).
+      // Segments are drawn clockwise from top: 0, 1, 2, ...
+      // Formula accounts for rotation direction and segment positioning.
       int selectedIndex = (n - (normalizedRotation / segmentAngle).floor() - 1 + n) % n;
 
       setState(() {
@@ -94,9 +127,8 @@ class _SpinWheelState extends State<SpinWheel>
         _selectedIndex = selectedIndex;
       });
 
-      // Play highlight animation then return result
+      // Play highlight animation, then return result after a short delay
       _highlightController.forward(from: 0).then((_) {
-        // Wait a moment to show the highlight
         Future.delayed(const Duration(milliseconds: 300), () {
           widget.onResult(widget.items[selectedIndex]);
         });
@@ -109,14 +141,15 @@ class _SpinWheelState extends State<SpinWheel>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Pointer at the top
+        // Triangular pointer at the top indicating selection position
         CustomPaint(
           size: const Size(30, 20),
           painter: _PointerPainter(
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        // The wheel
+
+        // The wheel itself
         GestureDetector(
           onTap: _spin,
           child: SizedBox(
@@ -125,7 +158,7 @@ class _SpinWheelState extends State<SpinWheel>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Wheel segments
+                // Rotating wheel with segments
                 Transform.rotate(
                   angle: _currentRotation,
                   child: CustomPaint(
@@ -137,7 +170,8 @@ class _SpinWheelState extends State<SpinWheel>
                     ),
                   ),
                 ),
-                // Center button
+
+                // Center "SPIN" button
                 Container(
                   width: 60,
                   height: 60,
@@ -167,8 +201,10 @@ class _SpinWheelState extends State<SpinWheel>
             ),
           ),
         ),
+
         const SizedBox(height: 16),
-        // Status text with selected item name
+
+        // Status text: shows instructions or selected item
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: _selectedIndex != null
@@ -195,10 +231,17 @@ class _SpinWheelState extends State<SpinWheel>
   }
 }
 
+/// Custom painter that draws the wheel segments.
+///
+/// Each segment is drawn as a colored arc with text label.
+/// The selected segment (if any) gets highlight effects:
+/// - Pulse (grows outward)
+/// - Glow (white border blur)
+/// - Brighten (color becomes lighter)
 class _WheelPainter extends CustomPainter {
   final List<SpinWheelItem> items;
   final int? selectedIndex;
-  final double highlightProgress;
+  final double highlightProgress; // 0.0 to 1.0
 
   _WheelPainter({
     required this.items,
@@ -213,24 +256,25 @@ class _WheelPainter extends CustomPainter {
     final segmentAngle = 2 * pi / items.length;
 
     for (int i = 0; i < items.length; i++) {
+      // Start angle offset by -pi/2 so first segment is at top
       final startAngle = i * segmentAngle - pi / 2;
       final isSelected = i == selectedIndex && highlightProgress > 0;
 
-      // Calculate highlight effect
+      // Calculate highlight effects for selected segment
       double segmentRadius = radius;
       Color segmentColor = items[i].color;
 
       if (isSelected) {
-        // Pulse effect - segment grows slightly
+        // Pulse effect: segment grows outward using sine wave
         final pulse = sin(highlightProgress * pi) * 8;
         segmentRadius = radius + pulse;
 
-        // Brighten the selected segment
+        // Brighten effect: blend color towards white
         final brightness = (sin(highlightProgress * pi) * 0.3).clamp(0.0, 1.0);
         segmentColor = Color.lerp(items[i].color, Colors.white, brightness)!;
       }
 
-      // Draw segment
+      // Draw filled segment
       final paint = Paint()
         ..color = segmentColor
         ..style = PaintingStyle.fill;
@@ -243,7 +287,7 @@ class _WheelPainter extends CustomPainter {
         paint,
       );
 
-      // Draw glow for selected segment
+      // Draw glow effect for selected segment
       if (isSelected) {
         final glowPaint = Paint()
           ..color = Colors.white.withValues(alpha: 0.5 * sin(highlightProgress * pi))
@@ -260,7 +304,7 @@ class _WheelPainter extends CustomPainter {
         );
       }
 
-      // Draw border
+      // Draw segment border
       final borderPaint = Paint()
         ..color = isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8)
         ..style = PaintingStyle.stroke
@@ -274,7 +318,7 @@ class _WheelPainter extends CustomPainter {
         borderPaint,
       );
 
-      // Draw text
+      // Draw text label at segment center
       final textAngle = startAngle + segmentAngle / 2;
       final textRadius = (isSelected ? segmentRadius : radius) * 0.65;
       final textX = center.dx + textRadius * cos(textAngle);
@@ -282,7 +326,7 @@ class _WheelPainter extends CustomPainter {
 
       canvas.save();
       canvas.translate(textX, textY);
-      canvas.rotate(textAngle + pi / 2);
+      canvas.rotate(textAngle + pi / 2); // Rotate text to be readable
 
       final textPainter = TextPainter(
         text: TextSpan(
@@ -313,6 +357,7 @@ class _WheelPainter extends CustomPainter {
     canvas.drawCircle(center, radius - 2, outerRingPaint);
   }
 
+  /// Returns black or white depending on background color luminance.
   Color _getContrastColor(Color color) {
     final luminance = color.computeLuminance();
     return luminance > 0.5 ? Colors.black87 : Colors.white;
@@ -325,6 +370,7 @@ class _WheelPainter extends CustomPainter {
   }
 }
 
+/// Custom painter for the triangular pointer above the wheel.
 class _PointerPainter extends CustomPainter {
   final Color color;
 
@@ -336,10 +382,11 @@ class _PointerPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
 
+    // Draw downward-pointing triangle
     final path = Path()
-      ..moveTo(size.width / 2, size.height)
-      ..lineTo(0, 0)
-      ..lineTo(size.width, 0)
+      ..moveTo(size.width / 2, size.height) // Bottom center point
+      ..lineTo(0, 0)                         // Top left
+      ..lineTo(size.width, 0)                // Top right
       ..close();
 
     canvas.drawPath(path, paint);
@@ -349,10 +396,18 @@ class _PointerPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+/// Represents an item on the spin wheel.
 class SpinWheelItem {
+  /// Display text shown on the wheel segment.
   final String label;
+
+  /// Internal value used for selection logic.
   final String value;
+
+  /// Background color of the segment.
   final Color color;
+
+  /// Optional icon (not currently used in wheel display).
   final IconData? icon;
 
   const SpinWheelItem({
@@ -363,7 +418,9 @@ class SpinWheelItem {
   });
 }
 
-// Predefined color palette for wheel segments
+/// Predefined color palette for wheel segments.
+///
+/// Provides visually distinct, vibrant colors that work well together.
 class WheelColors {
   static const List<Color> palette = [
     Color(0xFFE57373), // Red
@@ -380,6 +437,7 @@ class WheelColors {
     Color(0xFFBA68C8), // Purple 2
   ];
 
+  /// Returns a color from the palette, cycling if index exceeds palette length.
   static Color getColor(int index) {
     return palette[index % palette.length];
   }

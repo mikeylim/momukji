@@ -5,6 +5,15 @@ import '../providers/app_provider.dart';
 import '../models/chat_message.dart';
 import 'restaurant_card.dart';
 
+/// Chat interface widget for conversing with the AI food concierge.
+///
+/// Displays a scrollable list of chat messages with a text input
+/// at the bottom. Messages are styled differently based on sender:
+/// - User messages: right-aligned, primary color
+/// - Assistant messages: left-aligned, grey background
+/// - System messages: left-aligned, orange background
+///
+/// Assistant messages may include restaurant recommendation cards.
 class ChatWidget extends StatefulWidget {
   const ChatWidget({super.key});
 
@@ -13,8 +22,13 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
+  /// Controller for the message input text field.
   final TextEditingController _controller = TextEditingController();
+
+  /// Controller for scrolling the message list.
   final ScrollController _scrollController = ScrollController();
+
+  /// Focus node for managing keyboard focus on input.
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -23,6 +37,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       builder: (context, provider, child) {
         return Column(
           children: [
+            // Scrollable message list
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
@@ -34,6 +49,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                 },
               ),
             ),
+            // Message input area
             _buildInputArea(context, provider),
           ],
         );
@@ -41,11 +57,18 @@ class _ChatWidgetState extends State<ChatWidget> {
     );
   }
 
+  /// Builds a chat bubble for a single message.
+  ///
+  /// Handles three message types:
+  /// - Loading: shows animated dots
+  /// - Regular: shows text with appropriate styling
+  /// - With recommendations: includes restaurant cards below text
   Widget _buildMessageBubble(
     BuildContext context,
     ChatMessage message,
     AppProvider provider,
   ) {
+    // Show loading animation for pending AI response
     if (message.isLoading) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -76,6 +99,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         crossAxisAlignment:
             isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
+          // Message bubble
           Container(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.8,
@@ -88,6 +112,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                       ? Colors.orange[100]
                       : Colors.grey[200],
               borderRadius: BorderRadius.circular(16).copyWith(
+                // Pointed corner indicates message direction
                 bottomRight: isUser ? const Radius.circular(4) : null,
                 bottomLeft: !isUser ? const Radius.circular(4) : null,
               ),
@@ -100,6 +125,8 @@ class _ChatWidgetState extends State<ChatWidget> {
               ),
             ),
           ),
+
+          // Restaurant recommendation cards (if any)
           if (message.recommendations != null &&
               message.recommendations!.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -115,6 +142,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     );
   }
 
+  /// Builds the message input area at the bottom of the screen.
   Widget _buildInputArea(BuildContext context, AppProvider provider) {
     final isKorean = provider.locale.languageCode == 'ko';
 
@@ -133,6 +161,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       child: SafeArea(
         child: Row(
           children: [
+            // Text input field
             Expanded(
               child: TextField(
                 controller: _controller,
@@ -157,6 +186,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               ),
             ),
             const SizedBox(width: 8),
+            // Send button
             IconButton.filled(
               onPressed: () => _sendMessage(provider),
               icon: const Icon(Icons.send),
@@ -167,6 +197,10 @@ class _ChatWidgetState extends State<ChatWidget> {
     );
   }
 
+  /// Sends the current message to the AI.
+  ///
+  /// Clears the input, maintains focus for quick follow-up,
+  /// and scrolls to show the new message.
   void _sendMessage(AppProvider provider) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -175,7 +209,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     _controller.clear();
     _focusNode.requestFocus();
 
-    // Scroll to bottom
+    // Scroll to bottom after message is added
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(

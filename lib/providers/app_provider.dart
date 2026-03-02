@@ -8,13 +8,23 @@ import '../services/gemini_service.dart';
 import '../services/location_service.dart';
 import '../services/places_service.dart';
 
+/// Main application state provider using ChangeNotifier pattern.
+///
+/// Manages all app-wide state including:
+/// - User location and address
+/// - Chat messages and AI responses
+/// - Restaurant search results
+/// - Filter preferences
+/// - Language/locale settings
+///
+/// Acts as the central coordinator between services and UI.
 class AppProvider extends ChangeNotifier {
   // Services
   final GeminiService _geminiService = GeminiService();
   final LocationService _locationService = LocationService();
   final PlacesService _placesService = PlacesService();
 
-  // State
+  // State variables
   bool _isLoading = false;
   bool _isInitialized = false;
   String? _error;
@@ -26,7 +36,7 @@ class AppProvider extends ChangeNotifier {
   Restaurant? _selectedRestaurant;
   Locale _locale = const Locale('en');
 
-  // Getters
+  // Public getters for read-only access to state
   bool get isLoading => _isLoading;
   bool get isInitialized => _isInitialized;
   String? get error => _error;
@@ -38,6 +48,11 @@ class AppProvider extends ChangeNotifier {
   Restaurant? get selectedRestaurant => _selectedRestaurant;
   Locale get locale => _locale;
 
+  /// Initializes the app provider on startup.
+  ///
+  /// Loads saved preferences, initializes Gemini AI,
+  /// fetches user location, and adds welcome message.
+  /// Safe to call multiple times - subsequent calls are no-ops.
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -46,17 +61,17 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Load saved preferences
+      // Load saved language preference
       await _loadPreferences();
 
-      // Initialize Gemini
+      // Initialize AI service
       await _geminiService.initialize();
 
-      // Get current location
+      // Get user's current location
       _currentPosition = await _locationService.getCurrentLocation();
       _currentAddress = _locationService.currentAddress;
 
-      // Add welcome message
+      // Add localized welcome message
       _chatMessages.add(ChatMessage.system(
         _locale.languageCode == 'ko'
             ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
@@ -72,12 +87,14 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Loads saved user preferences from local storage.
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final langCode = prefs.getString('language') ?? 'en';
     _locale = Locale(langCode);
   }
 
+  /// Changes the app language and persists the setting.
   Future<void> setLocale(Locale locale) async {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
@@ -85,6 +102,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refreshes the user's current location.
   Future<void> refreshLocation() async {
     _isLoading = true;
     notifyListeners();
@@ -100,6 +118,9 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Geocodes an address and sets it as the current location.
+  ///
+  /// [address] is the street address or place name to search for.
   Future<void> searchLocationByAddress(String address) async {
     _isLoading = true;
     notifyListeners();
@@ -120,34 +141,45 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Sends a message to the AI and gets restaurant recommendations.
+  ///
+  /// [message] is the user's request (e.g., "I want Korean food").
+  ///
+  /// Flow:
+  /// 1. Add user message to chat
+  /// 2. Show loading indicator
+  /// 3. If location available, search nearby restaurants
+  /// 4. Send restaurant list to AI for analysis
+  /// 5. Match AI recommendations with actual places
+  /// 6. Add response to chat with recommendations
   Future<void> sendMessage(String message) async {
     if (message.trim().isEmpty) return;
 
     _isLoading = true;
 
-    // Add user message
+    // Add user's message to chat
     _chatMessages.add(ChatMessage.user(message));
     notifyListeners();
 
-    // Add loading message
+    // Show loading indicator while processing
     final loadingMessage = ChatMessage.loading();
     _chatMessages.add(loadingMessage);
     notifyListeners();
 
     try {
       if (_currentPosition == null) {
-        // Just chat without restaurant search
+        // No location - just chat without restaurant search
         final response = await _geminiService.chat(message, filters: _filterOptions);
-        _chatMessages.removeLast();
+        _chatMessages.removeLast(); // Remove loading
         _chatMessages.add(ChatMessage.assistant(response));
       } else {
-        // Build keyword from filters
+        // Build search keyword from cuisine filters
         String? keyword;
         if (_filterOptions.cuisineTypes.isNotEmpty) {
           keyword = _filterOptions.cuisineTypes.join(' ');
         }
 
-        // Get nearby restaurants with filters applied
+        // Search for nearby restaurants
         final nearbyRestaurants = await _placesService.getNearbyRestaurantsRaw(
           latitude: _currentPosition!.latitude,
           longitude: _currentPosition!.longitude,
@@ -165,7 +197,7 @@ class AppProvider extends ChangeNotifier {
                 : "I couldn't find any restaurants nearby. Try searching in a different location.",
           ));
         } else {
-          // Get AI recommendation
+          // Get AI recommendation based on nearby restaurants
           final recommendation = await _geminiService.getRestaurantRecommendation(
             userQuery: message,
             latitude: _currentPosition!.latitude,
@@ -174,11 +206,12 @@ class AppProvider extends ChangeNotifier {
             filters: _filterOptions,
           );
 
-          // Match recommended restaurants
+          // Extract recommended restaurant names
           final recommendedNames = (recommendation['recommendations'] as List?)
               ?.map((r) => r['name'] as String)
               .toList() ?? [];
 
+          // Match AI recommendations to actual restaurant data
           final matchedRestaurants = <Restaurant>[];
           for (final name in recommendedNames) {
             final match = nearbyRestaurants.firstWhere(
@@ -187,6 +220,7 @@ class AppProvider extends ChangeNotifier {
               orElse: () => <String, dynamic>{},
             );
             if (match.isNotEmpty) {
+              // Add AI's reason to the restaurant data
               final aiReason = (recommendation['recommendations'] as List?)
                   ?.firstWhere((r) => r['name'] == name, orElse: () => {})['reason'];
               match['ai_reason'] = aiReason;
@@ -194,6 +228,7 @@ class AppProvider extends ChangeNotifier {
             }
           }
 
+          // Use matched recommendations or fallback to top 5 nearby
           _restaurants = matchedRestaurants.isNotEmpty
               ? matchedRestaurants
               : nearbyRestaurants.take(5).map((r) => Restaurant.fromJson(r)).toList();
@@ -219,21 +254,25 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates the active filter options.
   void updateFilters(FilterOptions filters) {
     _filterOptions = filters;
     notifyListeners();
   }
 
+  /// Resets all filters to default values.
   void clearFilters() {
     _filterOptions = FilterOptions();
     notifyListeners();
   }
 
+  /// Selects a restaurant for detailed view or map focus.
   void selectRestaurant(Restaurant? restaurant) {
     _selectedRestaurant = restaurant;
     notifyListeners();
   }
 
+  /// Searches for restaurants by text query.
   Future<void> searchRestaurants(String query) async {
     if (_currentPosition == null) return;
 
@@ -254,9 +293,11 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Clears chat history and resets the AI conversation.
   void clearChat() {
     _chatMessages.clear();
     _geminiService.resetChat();
+    // Re-add welcome message
     _chatMessages.add(ChatMessage.system(
       _locale.languageCode == 'ko'
           ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
@@ -265,6 +306,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears the current error state.
   void clearError() {
     _error = null;
     notifyListeners();

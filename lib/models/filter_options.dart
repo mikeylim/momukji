@@ -1,11 +1,30 @@
+/// Contains all filter criteria for restaurant searches.
+///
+/// Used to refine AI recommendations and Places API queries
+/// based on user preferences like cuisine type, price, and dietary needs.
 class FilterOptions {
+  /// Selected cuisine types by country/region (e.g., Korean, Italian).
   final List<String> cuisineTypes;
+
+  /// Selected food categories (e.g., Pizza, Sushi, BBQ).
   final List<String> foodTypes;
+
+  /// Dietary restrictions to consider (e.g., Vegetarian, Gluten-Free).
   final List<String> dietaryRestrictions;
+
+  /// Price range filter (e.g., "$", "$$", "$$$").
   final String? priceRange;
-  final double? maxDistance; // in kilometers
+
+  /// Maximum search radius in kilometers.
+  final double? maxDistance;
+
+  /// Whether to only show currently open restaurants.
   final bool openNow;
+
+  /// Type of meal being sought (breakfast, lunch, dinner, etc.).
   final MealType? mealType;
+
+  /// Preferred dining style (dine-in, takeout, delivery).
   final DiningStyle? diningStyle;
 
   FilterOptions({
@@ -19,6 +38,7 @@ class FilterOptions {
     this.diningStyle,
   });
 
+  /// Creates a copy with optionally modified fields.
   FilterOptions copyWith({
     List<String>? cuisineTypes,
     List<String>? foodTypes,
@@ -41,6 +61,7 @@ class FilterOptions {
     );
   }
 
+  /// Returns true if any filters are currently active.
   bool get hasFilters {
     return cuisineTypes.isNotEmpty ||
         foodTypes.isNotEmpty ||
@@ -52,6 +73,10 @@ class FilterOptions {
         diningStyle != null;
   }
 
+  /// Converts active filters to a human-readable string for AI prompts.
+  ///
+  /// Used to enhance user queries with filter context when
+  /// requesting recommendations from Gemini.
   String toPromptString() {
     List<String> parts = [];
 
@@ -88,6 +113,7 @@ class FilterOptions {
   }
 }
 
+/// Types of meals for time-based filtering.
 enum MealType {
   breakfast,
   brunch,
@@ -96,6 +122,7 @@ enum MealType {
   lateNight,
   snack;
 
+  /// Returns a user-friendly display name for the meal type.
   String get displayName {
     switch (this) {
       case MealType.breakfast:
@@ -114,6 +141,7 @@ enum MealType {
   }
 }
 
+/// Dining style preferences for how to consume the meal.
 enum DiningStyle {
   dineIn,
   takeout,
@@ -121,6 +149,7 @@ enum DiningStyle {
   driveThrough,
   any;
 
+  /// Returns a user-friendly display name for the dining style.
   String get displayName {
     switch (this) {
       case DiningStyle.dineIn:
@@ -137,6 +166,7 @@ enum DiningStyle {
   }
 }
 
+/// Available cuisine types organized by country/region.
 class CuisineTypes {
   static const List<String> all = [
     'Korean',
@@ -163,6 +193,7 @@ class CuisineTypes {
   ];
 }
 
+/// Available food types organized by dish/category.
 class FoodTypes {
   static const List<String> all = [
     'Pizza',
@@ -185,6 +216,7 @@ class FoodTypes {
   ];
 }
 
+/// Common dietary restrictions and preferences.
 class DietaryRestrictions {
   static const List<String> all = [
     'Vegetarian',
@@ -203,7 +235,9 @@ class DietaryRestrictions {
   ];
 }
 
+/// Price range options with corresponding descriptions.
 class PriceRanges {
+  /// All available price range symbols.
   static const List<String> all = [
     '\$',
     '\$\$',
@@ -211,6 +245,7 @@ class PriceRanges {
     '\$\$\$\$',
   ];
 
+  /// Human-readable descriptions for each price level.
   static const Map<String, String> descriptions = {
     '\$': 'Budget-friendly',
     '\$\$': 'Moderate',

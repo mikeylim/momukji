@@ -3,15 +3,31 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/filter_options.dart';
 
+/// Service for interacting with Google's Gemini AI.
+///
+/// Handles AI-powered chat conversations and restaurant recommendations.
+/// Maintains a chat session for context-aware responses.
+/// Uses singleton pattern for shared instance.
 class GeminiService {
+  /// The Gemini generative model instance.
   late GenerativeModel _model;
+
+  /// Active chat session for maintaining conversation context.
   late ChatSession _chat;
+
+  /// Whether the service has been initialized.
   bool _isInitialized = false;
 
   static final GeminiService _instance = GeminiService._internal();
   factory GeminiService() => _instance;
   GeminiService._internal();
 
+  /// Initializes the Gemini model with API key and configuration.
+  ///
+  /// Must be called before any other methods. Safe to call multiple times;
+  /// subsequent calls are no-ops if already initialized.
+  ///
+  /// Throws an exception if the API key is not configured in .env file.
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -26,7 +42,7 @@ class GeminiService {
       model: 'gemini-2.5-flash',
       apiKey: apiKey,
       generationConfig: GenerationConfig(
-        temperature: 0.7,
+        temperature: 0.7,  // Balanced creativity
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 2048,
@@ -38,6 +54,7 @@ class GeminiService {
     _isInitialized = true;
   }
 
+  /// System prompt defining the AI's personality and behavior.
   static const String _systemPrompt = '''
 You are Momukji, a friendly and knowledgeable AI food concierge. Your name means "what should I eat?" in Korean.
 
@@ -56,9 +73,16 @@ When you have enough information to make restaurant recommendations, format your
 Keep responses concise but helpful. Ask clarifying questions if the user's request is vague.
 ''';
 
+  /// Sends a message to the AI and gets a response.
+  ///
+  /// [userMessage] is the user's input text.
+  /// [filters] optionally adds filter context to the message.
+  ///
+  /// Returns the AI's response text.
   Future<String> chat(String userMessage, {FilterOptions? filters}) async {
     await initialize();
 
+    // Append filter information to message if filters are active
     String enhancedMessage = userMessage;
     if (filters != null && filters.hasFilters) {
       enhancedMessage += '\n\nUser preferences: ${filters.toPromptString()}';
@@ -72,6 +96,17 @@ Keep responses concise but helpful. Ask clarifying questions if the user's reque
     }
   }
 
+  /// Analyzes nearby restaurants and recommends the best matches.
+  ///
+  /// [userQuery] is what the user is looking for.
+  /// [latitude] and [longitude] are the user's location.
+  /// [nearbyRestaurants] is the raw Places API data to analyze.
+  /// [filters] optionally adds preference context.
+  ///
+  /// Returns a JSON map with:
+  /// - "message": friendly recommendation message
+  /// - "recommendations": list of {name, reason} objects
+  /// - "follow_up_question": optional follow-up to refine search
   Future<Map<String, dynamic>> getRestaurantRecommendation({
     required String userQuery,
     required double latitude,
@@ -81,6 +116,7 @@ Keep responses concise but helpful. Ask clarifying questions if the user's reque
   }) async {
     await initialize();
 
+    // Format restaurant list for AI analysis
     final restaurantList = nearbyRestaurants
         .map((r) {
           return '''
@@ -128,12 +164,13 @@ Respond in JSON format:
       final response = await _model.generateContent([Content.text(prompt)]);
       final text = response.text ?? '';
 
-      // Try to parse JSON from response
+      // Extract JSON from response (may be wrapped in markdown code blocks)
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(text);
       if (jsonMatch != null) {
         return json.decode(jsonMatch.group(0)!);
       }
 
+      // Fallback if no JSON found
       return {
         'message': text,
         'recommendations': [],
@@ -144,6 +181,13 @@ Respond in JSON format:
     }
   }
 
+  /// Generates a quick food suggestion based on mood and preferences.
+  ///
+  /// [mood] describes how the user is feeling.
+  /// [cuisinePreferences] is a list of preferred cuisines.
+  /// [dietaryRestrictions] is a list of dietary needs.
+  ///
+  /// Returns a short, enthusiastic suggestion (1-2 sentences).
   Future<String> getQuickSuggestion({
     required String mood,
     required List<String> cuisinePreferences,
@@ -168,6 +212,9 @@ Give me a quick, enthusiastic food suggestion! Keep it to 1-2 sentences.
     }
   }
 
+  /// Resets the chat session to start a fresh conversation.
+  ///
+  /// Clears conversation history while keeping the model initialized.
   void resetChat() {
     if (_isInitialized) {
       _chat = _model.startChat(history: []);
