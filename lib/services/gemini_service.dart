@@ -16,12 +16,14 @@ class GeminiService {
     if (_isInitialized) return;
 
     final apiKey = dotenv.env['GEMINI_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
+    if (apiKey == null ||
+        apiKey.isEmpty ||
+        apiKey == 'your_gemini_api_key_here') {
       throw Exception('GEMINI_API_KEY not found in .env file');
     }
 
     _model = GenerativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       apiKey: apiKey,
       generationConfig: GenerationConfig(
         temperature: 0.7,
@@ -79,21 +81,25 @@ Keep responses concise but helpful. Ask clarifying questions if the user's reque
   }) async {
     await initialize();
 
-    final restaurantList = nearbyRestaurants.map((r) {
-      return '''
+    final restaurantList = nearbyRestaurants
+        .map((r) {
+          return '''
 - ${r['name']} (${r['types']?.join(', ') ?? 'Restaurant'})
   Rating: ${r['rating'] ?? 'N/A'} | Price: ${r['price_level'] != null ? '\$' * r['price_level'] : 'N/A'}
   Address: ${r['vicinity'] ?? r['formatted_address'] ?? 'N/A'}
   ${r['opening_hours']?['open_now'] == true ? 'Currently Open' : 'Hours Unknown'}
 ''';
-    }).join('\n');
+        })
+        .join('\n');
 
     String filterInfo = '';
     if (filters != null && filters.hasFilters) {
-      filterInfo = '\n\nUser preferences/restrictions: ${filters.toPromptString()}';
+      filterInfo =
+          '\n\nUser preferences/restrictions: ${filters.toPromptString()}';
     }
 
-    final prompt = '''
+    final prompt =
+        '''
 Based on the user's request and the list of nearby restaurants, recommend the best options.
 
 User's request: "$userQuery"$filterInfo
@@ -145,7 +151,8 @@ Respond in JSON format:
   }) async {
     await initialize();
 
-    final prompt = '''
+    final prompt =
+        '''
 I'm feeling $mood and I want something to eat.
 ${cuisinePreferences.isNotEmpty ? 'I like: ${cuisinePreferences.join(", ")}' : ''}
 ${dietaryRestrictions.isNotEmpty ? 'Dietary needs: ${dietaryRestrictions.join(", ")}' : ''}

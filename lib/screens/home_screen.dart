@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,8 @@ import '../widgets/chat_widget.dart';
 import '../widgets/filter_sheet.dart';
 import '../widgets/restaurant_card.dart';
 import '../widgets/location_bar.dart';
+import '../widgets/spin_wheel.dart';
+import '../widgets/shake_detector.dart';
 import 'map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -286,6 +289,90 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     );
   }
 
+  void _showSpinWheel(BuildContext context, AppProvider provider, bool isKorean) {
+    final wheelItems = _cuisines.asMap().entries.map((entry) {
+      final index = entry.key;
+      final cuisine = entry.value;
+      return SpinWheelItem(
+        label: isKorean ? cuisine.$2 : cuisine.$1,
+        value: cuisine.$1,
+        color: WheelColors.getColor(index),
+        icon: cuisine.$3,
+      );
+    }).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isKorean ? '오늘 뭐 먹지?' : "What to eat today?",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isKorean ? '휠을 돌려서 정해보세요!' : 'Spin the wheel to decide!',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: Center(
+                child: SpinWheel(
+                  items: wheelItems,
+                  size: MediaQuery.of(context).size.width * 0.8,
+                  onResult: (item) {
+                    Navigator.pop(context);
+                    // Set the selected cuisine and trigger search
+                    setState(() {
+                      _selectedCuisines.clear();
+                      _selectedCuisines.add(item.value);
+                    });
+                    // Show a snackbar with the result
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          isKorean
+                            ? '${item.label} 선택됨! 맛집을 찾아볼까요?'
+                            : '${item.label} selected! Finding restaurants...',
+                        ),
+                        action: SnackBarAction(
+                          label: isKorean ? '찾기' : 'Find',
+                          onPressed: () => _findRestaurants(provider, isKorean),
+                        ),
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _findRestaurants(AppProvider provider, bool isKorean) {
     final List<String> queryParts = [];
 
@@ -326,6 +413,46 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
     });
   }
 
+  void _onShake(BuildContext context, AppProvider provider, bool isKorean) {
+    // Prevent triggering while already loading
+    if (provider.isLoading) return;
+
+    // Pick a random cuisine
+    final random = Random();
+    final randomCuisine = _cuisines[random.nextInt(_cuisines.length)];
+    final cuisineName = isKorean ? randomCuisine.$2 : randomCuisine.$1;
+
+    // Update selection
+    setState(() {
+      _selectedCuisines.clear();
+      _selectedCuisines.add(randomCuisine.$1);
+    });
+
+    // Show feedback
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.shuffle, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              isKorean
+                  ? '🎲 $cuisineName 선택됨!'
+                  : '🎲 $cuisineName picked!',
+            ),
+          ],
+        ),
+        action: SnackBarAction(
+          label: isKorean ? '맛집 찾기' : 'Find',
+          onPressed: () => _findRestaurants(provider, isKorean),
+        ),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
@@ -333,16 +460,46 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
         final isKorean = provider.locale.languageCode == 'ko';
         final hasSelections = _selectedMood != null || _selectedCuisines.isNotEmpty;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Mood Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
+        return ShakeDetector(
+          onShake: () => _onShake(context, provider, isKorean),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Shake hint card
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.vibration,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isKorean ? '흔들어서 랜덤 선택!' : 'Shake for random pick!',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Mood Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
                     isKorean ? '오늘 기분은?' : "What's your mood?",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -364,6 +521,65 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
               ),
               const SizedBox(height: 12),
               _buildCuisineChips(isKorean),
+              const SizedBox(height: 16),
+
+              // Can't Decide Card with Spin Wheel
+              Card(
+                elevation: 0,
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  onTap: () => _showSpinWheel(context, provider, isKorean),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.casino,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isKorean ? '결정 못하겠어?' : "Can't decide?",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                isKorean ? '휠을 돌려서 정해보세요!' : 'Spin the wheel!',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey[400],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
 
               // Action Buttons
@@ -434,6 +650,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
               ],
             ],
           ),
+        ),
         );
       },
     );
