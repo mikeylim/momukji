@@ -116,52 +116,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F0), // Same as native splash
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App icon/logo
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Icon(
-                Icons.restaurant_menu,
-                size: 60,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            // Logo image (same as native splash)
+            Image.asset(
+              'assets/momukji_logo.png',
+              width: 200,
+              height: 200,
             ),
             const SizedBox(height: 24),
-            Text(
-              'Momukji',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '모먹지',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
+            const Text(
               'What should I eat?',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[500],
+                color: Color(0xFF9E9E9E),
+              ),
+            ),
+            const Text(
+              '뭐 먹을까?',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFFBDBDBD),
               ),
             ),
             const SizedBox(height: 48),
-            CircularProgressIndicator(
-              color: Theme.of(context).colorScheme.primary,
+            const CircularProgressIndicator(
+              color: Color(0xFFFF6B35),
             ),
           ],
         ),

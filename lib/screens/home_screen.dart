@@ -347,7 +347,8 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
                       _selectedCuisines.clear();
                       _selectedCuisines.add(item.value);
                     });
-                    // Show a snackbar with the result
+                    // Clear any existing snackbar and show new one
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -359,7 +360,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
                           label: isKorean ? '찾기' : 'Find',
                           onPressed: () => _findRestaurants(provider, isKorean),
                         ),
-                        duration: const Duration(seconds: 4),
+                        duration: const Duration(seconds: 3),
                       ),
                     );
                   },
@@ -448,7 +449,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
           onPressed: () => _findRestaurants(provider, isKorean),
         ),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
