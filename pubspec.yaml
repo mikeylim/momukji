@@ -1,0 +1,78 @@
+name: momukji
+description: "Momukji - AI-powered food and restaurant recommendation app"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Gemini AI
+  google_generative_ai: ^0.4.6
+
+  # Google Maps & Places
+  google_maps_flutter: ^2.9.0
+  google_places_flutter: ^2.0.9
+
+  # Location services
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
+
+  # State management
+  provider: ^6.1.2
+
+  # HTTP & networking
+  http: ^1.2.2
+
+  # Local storage for settings
+  shared_preferences: ^2.3.3
+
+  # Localization
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
+  # Environment variables for API keys
+  flutter_dotenv: ^5.2.1
+
+  # UI components
+  flutter_spinkit: ^5.2.1
+
+  # URL launcher
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/momukji_logo.png"
+  adaptive_icon_background: "#FFF5F0"
+  adaptive_icon_foreground: "assets/momukji_logo.png"
+
+flutter_native_splash:
+  color: "#FFF5F0"
+  image: "assets/momukji_logo.png"
+  android: true
+  ios: true
+  android_12:
+    color: "#FFF5F0"
+    image: "assets/momukji_logo.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/

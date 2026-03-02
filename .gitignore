@@ -1,0 +1,195 @@
+# ============================================
+# SENSITIVE FILES - NEVER COMMIT THESE!
+# ============================================
+
+# Environment variables and API keys
+.env
+.env.*
+!.env.example
+*.local
+
+# Secret/API key files
+secrets.properties
+secrets.json
+**/secrets/
+api_keys.dart
+
+# ============================================
+# Flutter/Dart
+# ============================================
+
+# Dart tool
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Build outputs
+/build/
+**/build/
+*.class
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+lib/generated_plugin_registrant.dart
+
+# Coverage
+/coverage/
+
+# Documentation
+**/doc/api/
+
+# Symbolication & obfuscation
+app.*.symbols
+app.*.map.json
+
+# ============================================
+# Android
+# ============================================
+
+# Gradle
+.gradle/
+**/android/.gradle/
+**/android/gradle/
+**/android/gradlew
+**/android/gradlew.bat
+
+# Local configuration
+**/android/local.properties
+**/android/key.properties
+**/android/*.keystore
+**/android/*.jks
+
+# Build artifacts
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/app/outputs/
+**/android/**/GeneratedPluginRegistrant.java
+
+# Google Services (contains project-specific data)
+**/google-services.json
+
+# ============================================
+# iOS
+# ============================================
+
+# Xcode
+**/ios/.symlinks/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Pods/
+**/ios/.generated/
+**/ios/DerivedData/
+
+# Pods
+Pods/
+Podfile.lock
+.cocoapods/
+
+# Fastlane
+**/ios/fastlane/report.xml
+**/ios/fastlane/Preview.html
+**/ios/fastlane/screenshots
+**/ios/fastlane/test_output
+
+# ============================================
+# IDE & Editors
+# ============================================
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*#
+.#*
+
+# ============================================
+# macOS
+# ============================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ============================================
+# Windows
+# ============================================
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.lnk
+
+# ============================================
+# Linux
+# ============================================
+
+*~
+
+# ============================================
+# Logs & Temp Files
+# ============================================
+
+*.log
+*.tmp
+*.temp
+*.cache
+logs/
+tmp/
+temp/
+
+# ============================================
+# Miscellaneous
+# ============================================
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Binary files (keep APKs for manual testing but don't commit)
+*.apk
+*.aab
+*.ipa
+
+# Node (if using any JS tools)
+node_modules/
+npm-debug.log
+
+# Python (if using any Python scripts)
+*.pyc
+__pycache__/
+*.py[cod]
+.Python
+venv/
+.venv/
+
+# Test artifacts
+test-results/
+screenshots/
