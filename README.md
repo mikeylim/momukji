@@ -11,6 +11,30 @@ An AI-powered food and restaurant recommendation app built with Flutter. "Momukj
 - Advanced filtering options (cuisine type, food type, dietary restrictions, price range, etc.)
 - Interactive chat interface for personalized recommendations
 
+## Tech Stack
+
+### Frontend
+- **Flutter/Dart** - Cross-platform mobile framework
+- **Provider** - State management
+- **Google Maps Flutter** - Interactive map integration
+- **Custom Animations** - AnimationController, CustomPainter for spin wheel
+
+### Backend & APIs
+- **Google Gemini AI** - Natural language processing for personalized recommendations
+- **Google Places API** - Restaurant data, ratings, and details
+- **Google Maps SDK** - Geocoding and location services
+
+### Key Libraries
+| Package | Purpose |
+|---------|---------|
+| `google_generative_ai` | Gemini AI integration |
+| `google_maps_flutter` | Map widget |
+| `geolocator` | Device GPS location |
+| `geocoding` | Address ↔ coordinates |
+| `sensors_plus` | Accelerometer for shake detection |
+| `flutter_dotenv` | Environment variable management |
+| `shared_preferences` | Local storage for settings |
+
 ## Screenshots
 
 *Coming soon*
