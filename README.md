@@ -59,7 +59,7 @@ cd momukji
 You'll need two API keys from Google:
 
 #### Google Gemini API Key
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Create a new API key
 3. Copy the key
 
@@ -86,8 +86,13 @@ nano .env  # or use any text editor
 Your `.env` file should look like:
 ```
 GEMINI_API_KEY=your_actual_gemini_key
+GEMINI_MODEL=gemini-3.7-flash
 GOOGLE_MAPS_API_KEY=your_actual_maps_key
 ```
+
+`GEMINI_MODEL` is optional. The app defaults to the stable
+`gemini-3.7-flash` model, which is available on the Gemini Developer API free
+tier subject to Google's current rate limits.
 
 ### 4. Configure Platform-Specific API Keys
 
@@ -154,6 +159,10 @@ lib/
 - The `.gitignore` is configured to exclude sensitive files
 - Always use `.env.example` as a template for others to set up their own keys
 - Consider restricting your API keys in Google Cloud Console (by app package name, bundle ID, or IP)
+- Treat the direct Gemini API key setup as development-only. Flutter assets can
+  be extracted from a released app, even when `.env` is excluded from Git.
+- Before production, migrate the AI client to Firebase AI Logic and enable App
+  Check so the Gemini credential is not embedded in the application binary.
 
 ## Contributing
 

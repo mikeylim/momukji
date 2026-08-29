@@ -9,6 +9,9 @@ import '../models/filter_options.dart';
 /// Maintains a chat session for context-aware responses.
 /// Uses singleton pattern for shared instance.
 class GeminiService {
+  /// Stable free-tier model used when GEMINI_MODEL is not configured.
+  static const String defaultModel = 'gemini-3.7-flash';
+
   /// The Gemini generative model instance.
   late GenerativeModel _model;
 
@@ -38,15 +41,12 @@ class GeminiService {
       throw Exception('GEMINI_API_KEY not found in .env file');
     }
 
+    final modelName = dotenv.env['GEMINI_MODEL']?.trim();
+
     _model = GenerativeModel(
-      model: 'gemini-3.1-pro-preview',
+      model: modelName == null || modelName.isEmpty ? defaultModel : modelName,
       apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        temperature: 0.7,  // Balanced creativity
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-      ),
+      generationConfig: GenerationConfig(maxOutputTokens: 2048),
       systemInstruction: Content.text(_systemPrompt),
     );
 
