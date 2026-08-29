@@ -221,7 +221,7 @@ class _SpinWheelState extends State<SpinWheel>
                   _isSpinning ? 'Spinning...' : 'Tap the wheel to spin!',
                   key: ValueKey(_isSpinning),
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                 ),

@@ -68,6 +68,8 @@ class _ChatWidgetState extends State<ChatWidget> {
     ChatMessage message,
     AppProvider provider,
   ) {
+    final colors = Theme.of(context).colorScheme;
+
     // Show loading animation for pending AI response
     if (message.isLoading) {
       return Padding(
@@ -77,13 +79,10 @@ class _ChatWidgetState extends State<ChatWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: colors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: SpinKitThreeBounce(
-                color: Theme.of(context).primaryColor,
-                size: 20,
-              ),
+              child: SpinKitThreeBounce(color: colors.primary, size: 20),
             ),
           ],
         ),
@@ -96,8 +95,9 @@ class _ChatWidgetState extends State<ChatWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           // Message bubble
           Container(
@@ -107,10 +107,10 @@ class _ChatWidgetState extends State<ChatWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isUser
-                  ? Theme.of(context).primaryColor
+                  ? colors.primary
                   : isSystem
-                      ? Colors.orange[100]
-                      : Colors.grey[200],
+                  ? colors.secondaryContainer
+                  : colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(16).copyWith(
                 // Pointed corner indicates message direction
                 bottomRight: isUser ? const Radius.circular(4) : null,
@@ -120,7 +120,11 @@ class _ChatWidgetState extends State<ChatWidget> {
             child: Text(
               message.content,
               style: TextStyle(
-                color: isUser ? Colors.white : Colors.black87,
+                color: isUser
+                    ? colors.onPrimary
+                    : isSystem
+                    ? colors.onSecondaryContainer
+                    : colors.onSurface,
                 fontSize: 16,
               ),
             ),
@@ -175,7 +179,9 @@ class _ChatWidgetState extends State<ChatWidget> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,

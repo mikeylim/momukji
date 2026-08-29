@@ -10,7 +10,7 @@ import '../models/filter_options.dart';
 /// Uses singleton pattern for shared instance.
 class GeminiService {
   /// Stable free-tier model used when GEMINI_MODEL is not configured.
-  static const String defaultModel = 'gemini-3.7-flash';
+  static const String defaultModel = 'gemini-3.5-flash-lite';
 
   /// The Gemini generative model instance.
   late GenerativeModel _model;

@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,59 +28,14 @@ class MomukjiApp extends StatelessWidget {
             title: 'Momukji',
             debugShowCheckedModeBanner: false,
             locale: provider.locale,
-            supportedLocales: const [
-              Locale('en'),
-              Locale('ko'),
-            ],
+            supportedLocales: const [Locale('en'), Locale('ko')],
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFFFF6B35), // Warm orange
-                brightness: Brightness.light,
-              ),
-              appBarTheme: const AppBarTheme(
-                centerTitle: false,
-                elevation: 0,
-                scrolledUnderElevation: 1,
-              ),
-              cardTheme: CardThemeData(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              chipTheme: ChipThemeData(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFFFF6B35),
-                brightness: Brightness.dark,
-              ),
-              appBarTheme: const AppBarTheme(
-                centerTitle: false,
-                elevation: 0,
-                scrolledUnderElevation: 1,
-              ),
-            ),
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
             themeMode: ThemeMode.system,
             home: const SplashScreen(),
           );
@@ -107,9 +63,9 @@ class _SplashScreenState extends State<SplashScreen> {
     // Wait for provider to initialize
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
     }
   }
 
@@ -122,30 +78,18 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo image (same as native splash)
-            Image.asset(
-              'assets/momukji_logo.png',
-              width: 200,
-              height: 200,
-            ),
+            Image.asset('assets/momukji_logo.png', width: 200, height: 200),
             const SizedBox(height: 24),
             const Text(
               'What should I eat?',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF9E9E9E),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(0xFF9E9E9E)),
             ),
             const Text(
               '뭐 먹을까?',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFFBDBDBD),
-              ),
+              style: TextStyle(fontSize: 14, color: Color(0xFFBDBDBD)),
             ),
             const SizedBox(height: 48),
-            const CircularProgressIndicator(
-              color: Color(0xFFFF6B35),
-            ),
+            const CircularProgressIndicator(color: Color(0xFFFF6B35)),
           ],
         ),
       ),

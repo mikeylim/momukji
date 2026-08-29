@@ -157,7 +157,9 @@ class _FilterSheetState extends State<FilterSheet> {
                       ? '${(_selectedDistance ?? 5).toStringAsFixed(1)}km 이내'
                       : 'Within ${(_selectedDistance ?? 5).toStringAsFixed(1)}km',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 16),
 

@@ -9,16 +9,15 @@ class LocationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
+        final colors = Theme.of(context).colorScheme;
         final isKorean = provider.locale.languageCode == 'ko';
         final hasLocation = provider.currentPosition != null;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[200]!),
-            ),
+            color: colors.surface,
+            border: Border(bottom: BorderSide(color: colors.outlineVariant)),
           ),
           child: InkWell(
             onTap: () => _showLocationDialog(context, provider, isKorean),
@@ -26,9 +25,7 @@ class LocationBar extends StatelessWidget {
               children: [
                 Icon(
                   hasLocation ? Icons.location_on : Icons.location_off,
-                  color: hasLocation
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey,
+                  color: hasLocation ? colors.primary : colors.onSurfaceVariant,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -36,20 +33,19 @@ class LocationBar extends StatelessWidget {
                   child: Text(
                     hasLocation
                         ? (provider.currentAddress ??
-                            '${provider.currentPosition!.latitude.toStringAsFixed(4)}, ${provider.currentPosition!.longitude.toStringAsFixed(4)}')
+                              '${provider.currentPosition!.latitude.toStringAsFixed(4)}, ${provider.currentPosition!.longitude.toStringAsFixed(4)}')
                         : (isKorean ? '위치 설정하기' : 'Set location'),
                     style: TextStyle(
-                      color: hasLocation ? Colors.black87 : Colors.grey,
+                      color: hasLocation
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant,
                       fontSize: 14,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey[600],
-                ),
+                Icon(Icons.keyboard_arrow_down, color: colors.onSurfaceVariant),
               ],
             ),
           ),
@@ -84,10 +80,7 @@ class LocationBar extends StatelessWidget {
           children: [
             Text(
               isKorean ? '위치 설정' : 'Set Location',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             ListTile(
@@ -100,12 +93,14 @@ class LocationBar extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              tileColor: Colors.grey[100],
+              tileColor: Theme.of(context).colorScheme.surfaceContainerHigh,
             ),
             const SizedBox(height: 16),
             Text(
               isKorean ? '또는 주소 검색' : 'Or search for an address',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(

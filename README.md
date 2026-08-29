@@ -86,13 +86,14 @@ nano .env  # or use any text editor
 Your `.env` file should look like:
 ```
 GEMINI_API_KEY=your_actual_gemini_key
-GEMINI_MODEL=gemini-3.7-flash
+GEMINI_MODEL=gemini-3.5-flash-lite
 GOOGLE_MAPS_API_KEY=your_actual_maps_key
 ```
 
 `GEMINI_MODEL` is optional. The app defaults to the stable
-`gemini-3.7-flash` model, which is available on the Gemini Developer API free
-tier subject to Google's current rate limits.
+`gemini-3.5-flash-lite` model, which is optimized for high-throughput,
+low-latency use and is available on the Gemini Developer API free tier subject
+to Google's current rate limits.
 
 ### 4. Configure Platform-Specific API Keys
 

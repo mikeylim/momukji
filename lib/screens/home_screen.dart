@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   '모먹지',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 provider.locale.languageCode == 'en'
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).colorScheme.primary,
               ),
               onTap: () {
                 provider.setLocale(const Locale('en'));
@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 provider.locale.languageCode == 'ko'
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).colorScheme.primary,
               ),
               onTap: () {
                 provider.setLocale(const Locale('ko'));
@@ -338,7 +338,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -352,7 +352,9 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
             const SizedBox(height: 8),
             Text(
               isKorean ? '휠을 돌려서 정해보세요!' : 'Spin the wheel to decide!',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -595,7 +597,9 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
                               Text(
                                 isKorean ? '휠을 돌려서 정해보세요!' : 'Spin the wheel!',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   fontSize: 13,
                                 ),
                               ),
@@ -605,7 +609,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
                         Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ],
                     ),
@@ -761,7 +765,7 @@ class _QuickSelectWidgetState extends State<QuickSelectWidget> {
           Text(
             isKorean ? '잠시만 기다려주세요' : 'Please wait a moment',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

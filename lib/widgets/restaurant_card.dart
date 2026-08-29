@@ -18,6 +18,7 @@ class RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context, listen: false);
+    final colors = Theme.of(context).colorScheme;
     final isKorean = provider.locale.languageCode == 'ko';
 
     if (compact) {
@@ -52,7 +53,7 @@ class RestaurantCard extends StatelessWidget {
                         Text(
                           restaurant.typesDisplay,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: colors.onSurfaceVariant,
                             fontSize: 14,
                           ),
                         ),
@@ -89,19 +90,27 @@ class RestaurantCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       restaurant.address,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: TextStyle(
+                        color: colors.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-              if (restaurant.priceLevel != null || restaurant.isOpen != null) ...[
+              if (restaurant.priceLevel != null ||
+                  restaurant.isOpen != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -109,11 +118,12 @@ class RestaurantCard extends StatelessWidget {
                       Text(
                         restaurant.priceLevel!,
                         style: TextStyle(
-                          color: Colors.green[700],
+                          color: colors.tertiary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (restaurant.priceLevel != null && restaurant.isOpen != null)
+                    if (restaurant.priceLevel != null &&
+                        restaurant.isOpen != null)
                       const SizedBox(width: 12),
                     if (restaurant.isOpen != null)
                       Container(
@@ -123,8 +133,8 @@ class RestaurantCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: restaurant.isOpen!
-                              ? Colors.green[100]
-                              : Colors.red[100],
+                              ? colors.tertiaryContainer
+                              : colors.errorContainer,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -133,8 +143,8 @@ class RestaurantCard extends StatelessWidget {
                               : (isKorean ? '영업 종료' : 'Closed'),
                           style: TextStyle(
                             color: restaurant.isOpen!
-                                ? Colors.green[700]
-                                : Colors.red[700],
+                                ? colors.onTertiaryContainer
+                                : colors.onErrorContainer,
                             fontSize: 12,
                           ),
                         ),
@@ -147,19 +157,23 @@ class RestaurantCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: colors.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.auto_awesome, size: 16, color: Colors.blue[700]),
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 16,
+                        color: colors.onSecondaryContainer,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           restaurant.aiReason!,
                           style: TextStyle(
-                            color: Colors.blue[700],
+                            color: colors.onSecondaryContainer,
                             fontSize: 13,
                           ),
                         ),
@@ -198,6 +212,8 @@ class RestaurantCard extends StatelessWidget {
   }
 
   Widget _buildCompactCard(BuildContext context, bool isKorean) {
+    final colors = Theme.of(context).colorScheme;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -222,7 +238,10 @@ class RestaurantCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     restaurant.typesDisplay,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -242,7 +261,7 @@ class RestaurantCard extends StatelessWidget {
                         Text(
                           restaurant.priceLevel!,
                           style: TextStyle(
-                            color: Colors.green[700],
+                            color: colors.tertiary,
                             fontSize: 12,
                           ),
                         ),
@@ -292,7 +311,7 @@ class RestaurantCard extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -309,7 +328,7 @@ class RestaurantCard extends StatelessWidget {
               Text(
                 restaurant.typesDisplay,
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 16,
                 ),
               ),
@@ -329,7 +348,7 @@ class RestaurantCard extends StatelessWidget {
                     Text(
                       restaurant.priceLevel!,
                       style: TextStyle(
-                        color: Colors.green[700],
+                        color: Theme.of(context).colorScheme.tertiary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -353,9 +372,7 @@ class RestaurantCard extends StatelessWidget {
               if (restaurant.website != null)
                 ListTile(
                   leading: const Icon(Icons.language),
-                  title: Text(
-                    isKorean ? '웹사이트 방문' : 'Visit Website',
-                  ),
+                  title: Text(isKorean ? '웹사이트 방문' : 'Visit Website'),
                   contentPadding: EdgeInsets.zero,
                   onTap: () => _openWebsite(restaurant.website!),
                 ),
@@ -364,7 +381,7 @@ class RestaurantCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -372,12 +389,19 @@ class RestaurantCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.auto_awesome, color: Colors.blue[700]),
+                          Icon(
+                            Icons.auto_awesome,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             isKorean ? 'AI 추천 이유' : 'Why We Recommend',
                             style: TextStyle(
-                              color: Colors.blue[700],
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSecondaryContainer,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -386,7 +410,11 @@ class RestaurantCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         restaurant.aiReason!,
-                        style: TextStyle(color: Colors.blue[700]),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondaryContainer,
+                        ),
                       ),
                     ],
                   ),
