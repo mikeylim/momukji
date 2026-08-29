@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:momukji/services/gemini_service.dart';
 import 'package:momukji/theme/app_theme.dart';
+import 'package:momukji/providers/app_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('App starts correctly', (WidgetTester tester) async {
@@ -21,6 +23,17 @@ void main() {
       _contrastRatio(colors.onSurfaceVariant, colors.surface),
       greaterThan(4.5),
     );
+  });
+
+  test('theme selection is persisted', () async {
+    SharedPreferences.setMockInitialValues({});
+    final provider = AppProvider();
+
+    await provider.setThemeMode(ThemeMode.dark);
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(provider.themeMode, ThemeMode.dark);
+    expect(preferences.getString('theme_mode'), 'dark');
   });
 }
 

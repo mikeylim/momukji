@@ -49,6 +49,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
+                icon: Icon(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
+                  provider.setThemeMode(
+                    isDark ? ThemeMode.light : ThemeMode.dark,
+                  );
+                },
+                tooltip: Theme.of(context).brightness == Brightness.dark
+                    ? 'Use light theme'
+                    : 'Use dark theme',
+              ),
+              IconButton(
                 icon: const Icon(Icons.language),
                 onPressed: () => _showLanguageDialog(context, provider),
                 tooltip: 'Language',

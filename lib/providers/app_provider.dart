@@ -35,6 +35,7 @@ class AppProvider extends ChangeNotifier {
   FilterOptions _filterOptions = FilterOptions();
   Restaurant? _selectedRestaurant;
   Locale _locale = const Locale('en');
+  ThemeMode _themeMode = ThemeMode.system;
 
   // Public getters for read-only access to state
   bool get isLoading => _isLoading;
@@ -47,6 +48,7 @@ class AppProvider extends ChangeNotifier {
   FilterOptions get filterOptions => _filterOptions;
   Restaurant? get selectedRestaurant => _selectedRestaurant;
   Locale get locale => _locale;
+  ThemeMode get themeMode => _themeMode;
 
   /// Initializes the app provider on startup.
   ///
@@ -92,6 +94,11 @@ class AppProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final langCode = prefs.getString('language') ?? 'en';
     _locale = Locale(langCode);
+    _themeMode = switch (prefs.getString('theme_mode')) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
   }
 
   /// Changes the app language and persists the setting.
@@ -99,6 +106,14 @@ class AppProvider extends ChangeNotifier {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language', locale.languageCode);
+    notifyListeners();
+  }
+
+  /// Changes the app theme and persists the user's selection.
+  Future<void> setThemeMode(ThemeMode themeMode) async {
+    _themeMode = themeMode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('theme_mode', themeMode.name);
     notifyListeners();
   }
 
