@@ -18,6 +18,18 @@ class PlacesService {
   /// Base URL for Google Places API endpoints.
   static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
+  /// Formats the status and diagnostic message returned by Places API.
+  String _formatApiError(Map<String, dynamic> data) {
+    final status = data['status']?.toString() ?? 'UNKNOWN_ERROR';
+    final details = data['error_message']?.toString().trim();
+
+    if (details == null || details.isEmpty) {
+      return 'Places API error: $status';
+    }
+
+    return 'Places API error: $status. $details';
+  }
+
   /// Searches for restaurants near a given location.
   ///
   /// [latitude] and [longitude] specify the search center.
@@ -48,7 +60,9 @@ class PlacesService {
       params['keyword'] = keyword;
     }
 
-    final uri = Uri.parse('$_baseUrl/nearbysearch/json').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$_baseUrl/nearbysearch/json',
+    ).replace(queryParameters: params);
 
     try {
       final response = await http.get(uri);
@@ -62,7 +76,7 @@ class PlacesService {
         } else if (data['status'] == 'ZERO_RESULTS') {
           return [];
         } else {
-          throw Exception('Places API error: ${data['status']}');
+          throw Exception(_formatApiError(data));
         }
       } else {
         throw Exception('HTTP error: ${response.statusCode}');
@@ -101,7 +115,9 @@ class PlacesService {
       params['radius'] = radius.toString();
     }
 
-    final uri = Uri.parse('$_baseUrl/textsearch/json').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$_baseUrl/textsearch/json',
+    ).replace(queryParameters: params);
 
     try {
       final response = await http.get(uri);
@@ -115,7 +131,7 @@ class PlacesService {
         } else if (data['status'] == 'ZERO_RESULTS') {
           return [];
         } else {
-          throw Exception('Places API error: ${data['status']}');
+          throw Exception(_formatApiError(data));
         }
       } else {
         throw Exception('HTTP error: ${response.statusCode}');
@@ -138,12 +154,15 @@ class PlacesService {
 
     final params = {
       'place_id': placeId,
-      'fields': 'place_id,name,formatted_address,geometry,rating,user_ratings_total,'
+      'fields':
+          'place_id,name,formatted_address,geometry,rating,user_ratings_total,'
           'price_level,types,opening_hours,formatted_phone_number,website,photos',
       'key': _apiKey,
     };
 
-    final uri = Uri.parse('$_baseUrl/details/json').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$_baseUrl/details/json',
+    ).replace(queryParameters: params);
 
     try {
       final response = await http.get(uri);
@@ -154,7 +173,8 @@ class PlacesService {
         if (data['status'] == 'OK') {
           final result = data['result'];
           // Add photo URL if available
-          if (result['photos'] != null && (result['photos'] as List).isNotEmpty) {
+          if (result['photos'] != null &&
+              (result['photos'] as List).isNotEmpty) {
             final photoRef = result['photos'][0]['photo_reference'];
             result['photo_url'] = getPhotoUrl(photoRef);
           }
@@ -203,7 +223,9 @@ class PlacesService {
       params['keyword'] = keyword;
     }
 
-    final uri = Uri.parse('$_baseUrl/nearbysearch/json').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$_baseUrl/nearbysearch/json',
+    ).replace(queryParameters: params);
 
     try {
       final response = await http.get(uri);
@@ -216,7 +238,7 @@ class PlacesService {
         } else if (data['status'] == 'ZERO_RESULTS') {
           return [];
         } else {
-          throw Exception('Places API error: ${data['status']}');
+          throw Exception(_formatApiError(data));
         }
       } else {
         throw Exception('HTTP error: ${response.statusCode}');
