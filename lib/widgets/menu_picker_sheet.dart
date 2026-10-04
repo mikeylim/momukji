@@ -211,6 +211,13 @@ class _MenuPickerSheetState extends State<MenuPickerSheet> {
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
+                        Text(
+                          isKorean
+                              ? '아래로 스크롤하면 메뉴 ${MenuCatalog.dishesPerCuisine}가지를 모두 볼 수 있어요.'
+                              : 'Scroll below the wheel to see all ${MenuCatalog.dishesPerCuisine} dishes.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: colors.onSurfaceVariant),
+                        ),
                         if (_dishCuisine == null)
                           TextButton.icon(
                             onPressed: _anotherCuisine,

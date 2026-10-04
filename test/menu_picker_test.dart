@@ -130,6 +130,30 @@ void main() {
     expect(choice?.label, 'Korean');
   });
 
+  testWidgets('selecting a dish cuisine exposes its complete catalog', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: MenuPickerSheet(isKorean: false))),
+    );
+
+    await tester.tap(find.text('Spin dish'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<MenuCuisine?>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Korean').last);
+    await tester.pumpAndSettle();
+
+    final wheel = tester.widget<SpinWheel>(find.byType(SpinWheel));
+    expect(wheel.items, hasLength(MenuCatalog.dishesPerCuisine));
+    expect(
+      wheel.items.map((item) => item.label).toList(),
+      MenuCatalog.cuisines.first.dishes.map((dish) => dish.name).toList(),
+    );
+    expect(find.text('Another category'), findsNothing);
+    expect(find.byType(Chip), findsNWidgets(MenuCatalog.dishesPerCuisine));
+  });
+
   testWidgets('spinning a dish returns a dish from the catalog', (
     tester,
   ) async {
