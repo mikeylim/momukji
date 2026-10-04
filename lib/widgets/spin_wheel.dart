@@ -17,26 +17,29 @@ class SpinWheel extends StatefulWidget {
   /// Size of the wheel (width and height). Defaults to 300.
   final double size;
 
+  /// Whether wheel instructions should be shown in Korean.
+  final bool isKorean;
+
   const SpinWheel({
     super.key,
     required this.items,
     required this.onResult,
     this.size = 300,
+    this.isKorean = false,
   });
 
   @override
   State<SpinWheel> createState() => _SpinWheelState();
 }
 
-class _SpinWheelState extends State<SpinWheel>
-    with TickerProviderStateMixin {
+class _SpinWheelState extends State<SpinWheel> with TickerProviderStateMixin {
   // Animation controller for the spinning motion
   late AnimationController _spinController;
 
   // Animation controller for the highlight effect after selection
   late AnimationController _highlightController;
 
-  late Animation<double> _spinAnimation;
+  Animation<double>? _spinAnimation;
   late Animation<double> _highlightAnimation;
 
   // Current rotation angle in radians
@@ -75,6 +78,7 @@ class _SpinWheelState extends State<SpinWheel>
 
   @override
   void dispose() {
+    _spinAnimation?.removeListener(_updateRotation);
     _spinController.dispose();
     _highlightController.dispose();
     super.dispose();
@@ -85,7 +89,7 @@ class _SpinWheelState extends State<SpinWheel>
   /// Generates a random rotation amount (3-5 full rotations + random extra)
   /// and animates the wheel with easeOutCubic curve for realistic deceleration.
   void _spin() {
-    if (_isSpinning) return;
+    if (_isSpinning || widget.items.isEmpty) return;
 
     setState(() {
       _isSpinning = true;
@@ -97,21 +101,20 @@ class _SpinWheelState extends State<SpinWheel>
     final extraRotation = _random.nextDouble() * 2 * pi;
     final totalRotation = fullRotations * 2 * pi + extraRotation;
 
-    _spinAnimation = Tween<double>(
-      begin: _currentRotation,
-      end: _currentRotation + totalRotation,
-    ).animate(CurvedAnimation(
-      parent: _spinController,
-      curve: Curves.easeOutCubic,
-    ));
+    // Replace the old listener so repeated spins update the wheel once per tick.
+    _spinAnimation?.removeListener(_updateRotation);
+    _spinAnimation =
+        Tween<double>(
+          begin: _currentRotation,
+          end: _currentRotation + totalRotation,
+        ).animate(
+          CurvedAnimation(parent: _spinController, curve: Curves.easeOutCubic),
+        );
 
-    _spinAnimation.addListener(() {
-      setState(() {
-        _currentRotation = _spinAnimation.value;
-      });
-    });
+    _spinAnimation!.addListener(_updateRotation);
 
     _spinController.forward(from: 0).then((_) {
+      if (!mounted) return;
       // Calculate which segment is under the pointer
       final segmentAngle = 2 * pi / widget.items.length;
       final normalizedRotation = _currentRotation % (2 * pi);
@@ -120,7 +123,8 @@ class _SpinWheelState extends State<SpinWheel>
       // The wheel rotates clockwise (positive angle in Flutter).
       // Segments are drawn clockwise from top: 0, 1, 2, ...
       // Formula accounts for rotation direction and segment positioning.
-      int selectedIndex = (n - (normalizedRotation / segmentAngle).floor() - 1 + n) % n;
+      int selectedIndex =
+          (n - (normalizedRotation / segmentAngle).floor() - 1 + n) % n;
 
       setState(() {
         _isSpinning = false;
@@ -130,9 +134,15 @@ class _SpinWheelState extends State<SpinWheel>
       // Play highlight animation, then return result after a short delay
       _highlightController.forward(from: 0).then((_) {
         Future.delayed(const Duration(milliseconds: 300), () {
-          widget.onResult(widget.items[selectedIndex]);
+          if (mounted) widget.onResult(widget.items[selectedIndex]);
         });
       });
+    });
+  }
+
+  void _updateRotation() {
+    setState(() {
+      _currentRotation = _spinAnimation!.value;
     });
   }
 
@@ -150,54 +160,60 @@ class _SpinWheelState extends State<SpinWheel>
         ),
 
         // The wheel itself
-        GestureDetector(
-          onTap: _spin,
-          child: SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Rotating wheel with segments
-                Transform.rotate(
-                  angle: _currentRotation,
-                  child: CustomPaint(
-                    size: Size(widget.size, widget.size),
-                    painter: _WheelPainter(
-                      items: widget.items,
-                      selectedIndex: _selectedIndex,
-                      highlightProgress: _highlightAnimation.value,
+        Semantics(
+          button: true,
+          label: widget.isKorean ? '휠 돌리기' : 'Spin the wheel',
+          child: GestureDetector(
+            onTap: _spin,
+            child: SizedBox(
+              width: widget.size,
+              height: widget.size,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Rotating wheel with segments
+                  Transform.rotate(
+                    angle: _currentRotation,
+                    child: CustomPaint(
+                      size: Size(widget.size, widget.size),
+                      painter: _WheelPainter(
+                        items: widget.items,
+                        selectedIndex: _selectedIndex,
+                        highlightProgress: _highlightAnimation.value,
+                      ),
                     ),
                   ),
-                ),
 
-                // Center "SPIN" button
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.primary,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      _isSpinning ? '...' : 'SPIN',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                  // Center "SPIN" button
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        _isSpinning
+                            ? '...'
+                            : (widget.isKorean ? '돌리기' : 'SPIN'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -218,7 +234,11 @@ class _SpinWheelState extends State<SpinWheel>
                   ),
                 )
               : Text(
-                  _isSpinning ? 'Spinning...' : 'Tap the wheel to spin!',
+                  _isSpinning
+                      ? (widget.isKorean ? '돌리는 중...' : 'Spinning...')
+                      : (widget.isKorean
+                            ? '휠을 눌러 돌려보세요!'
+                            : 'Tap the wheel to spin!'),
                   key: ValueKey(_isSpinning),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -290,7 +310,9 @@ class _WheelPainter extends CustomPainter {
       // Draw glow effect for selected segment
       if (isSelected) {
         final glowPaint = Paint()
-          ..color = Colors.white.withValues(alpha: 0.5 * sin(highlightProgress * pi))
+          ..color = Colors.white.withValues(
+            alpha: 0.5 * sin(highlightProgress * pi),
+          )
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
@@ -306,7 +328,9 @@ class _WheelPainter extends CustomPainter {
 
       // Draw segment border
       final borderPaint = Paint()
-        ..color = isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8)
+        ..color = isSelected
+            ? Colors.white
+            : Colors.white.withValues(alpha: 0.8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = isSelected ? 4 : 2;
 
@@ -330,7 +354,7 @@ class _WheelPainter extends CustomPainter {
 
       final textPainter = TextPainter(
         text: TextSpan(
-          text: items[i].label,
+          text: items[i].wheelLabel ?? items[i].label,
           style: TextStyle(
             color: _getContrastColor(segmentColor),
             fontSize: isSelected ? 14 : 12,
@@ -339,6 +363,8 @@ class _WheelPainter extends CustomPainter {
         ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
+        maxLines: 2,
+        ellipsis: '…',
       );
       textPainter.layout(maxWidth: radius * 0.5);
       textPainter.paint(
@@ -385,8 +411,8 @@ class _PointerPainter extends CustomPainter {
     // Draw downward-pointing triangle
     final path = Path()
       ..moveTo(size.width / 2, size.height) // Bottom center point
-      ..lineTo(0, 0)                         // Top left
-      ..lineTo(size.width, 0)                // Top right
+      ..lineTo(0, 0) // Top left
+      ..lineTo(size.width, 0) // Top right
       ..close();
 
     canvas.drawPath(path, paint);
@@ -398,8 +424,11 @@ class _PointerPainter extends CustomPainter {
 
 /// Represents an item on the spin wheel.
 class SpinWheelItem {
-  /// Display text shown on the wheel segment.
+  /// Full text shown after a spin.
   final String label;
+
+  /// Optional short text for a narrow segment (for example, a dish number).
+  final String? wheelLabel;
 
   /// Internal value used for selection logic.
   final String value;
@@ -412,6 +441,7 @@ class SpinWheelItem {
 
   const SpinWheelItem({
     required this.label,
+    this.wheelLabel,
     required this.value,
     required this.color,
     this.icon,

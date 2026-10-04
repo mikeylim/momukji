@@ -74,11 +74,13 @@ class AppProvider extends ChangeNotifier {
       _currentAddress = _locationService.currentAddress;
 
       // Add localized welcome message
-      _chatMessages.add(ChatMessage.system(
-        _locale.languageCode == 'ko'
-            ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
-            : "Hi! I'm Momukji, your food concierge. What are you in the mood to eat today?",
-      ));
+      _chatMessages.add(
+        ChatMessage.system(
+          _locale.languageCode == 'ko'
+              ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
+              : "Hi! I'm Momukji, your food concierge. What are you in the mood to eat today?",
+        ),
+      );
 
       _isInitialized = true;
     } catch (e) {
@@ -184,7 +186,10 @@ class AppProvider extends ChangeNotifier {
     try {
       if (_currentPosition == null) {
         // No location - just chat without restaurant search
-        final response = await _geminiService.chat(message, filters: _filterOptions);
+        final response = await _geminiService.chat(
+          message,
+          filters: _filterOptions,
+        );
         _chatMessages.removeLast(); // Remove loading
         _chatMessages.add(ChatMessage.assistant(response));
       } else {
@@ -206,38 +211,51 @@ class AppProvider extends ChangeNotifier {
 
         if (nearbyRestaurants.isEmpty) {
           _chatMessages.removeLast();
-          _chatMessages.add(ChatMessage.assistant(
-            _locale.languageCode == 'ko'
-                ? '근처에 레스토랑을 찾을 수 없어요. 다른 위치를 검색해 보세요.'
-                : "I couldn't find any restaurants nearby. Try searching in a different location.",
-          ));
+          _chatMessages.add(
+            ChatMessage.assistant(
+              _locale.languageCode == 'ko'
+                  ? '근처에 레스토랑을 찾을 수 없어요. 다른 위치를 검색해 보세요.'
+                  : "I couldn't find any restaurants nearby. Try searching in a different location.",
+            ),
+          );
         } else {
           // Get AI recommendation based on nearby restaurants
-          final recommendation = await _geminiService.getRestaurantRecommendation(
-            userQuery: message,
-            latitude: _currentPosition!.latitude,
-            longitude: _currentPosition!.longitude,
-            nearbyRestaurants: nearbyRestaurants,
-            filters: _filterOptions,
-          );
+          final recommendation = await _geminiService
+              .getRestaurantRecommendation(
+                userQuery: message,
+                latitude: _currentPosition!.latitude,
+                longitude: _currentPosition!.longitude,
+                nearbyRestaurants: nearbyRestaurants,
+                filters: _filterOptions,
+              );
 
           // Extract recommended restaurant names
-          final recommendedNames = (recommendation['recommendations'] as List?)
-              ?.map((r) => r['name'] as String)
-              .toList() ?? [];
+          final recommendedNames =
+              (recommendation['recommendations'] as List?)
+                  ?.map((r) => r['name'] as String)
+                  .toList() ??
+              [];
 
           // Match AI recommendations to actual restaurant data
           final matchedRestaurants = <Restaurant>[];
           for (final name in recommendedNames) {
             final match = nearbyRestaurants.firstWhere(
-              (r) => (r['name'] as String).toLowerCase().contains(name.toLowerCase()) ||
-                     name.toLowerCase().contains((r['name'] as String).toLowerCase()),
+              (r) =>
+                  (r['name'] as String).toLowerCase().contains(
+                    name.toLowerCase(),
+                  ) ||
+                  name.toLowerCase().contains(
+                    (r['name'] as String).toLowerCase(),
+                  ),
               orElse: () => <String, dynamic>{},
             );
             if (match.isNotEmpty) {
               // Add AI's reason to the restaurant data
               final aiReason = (recommendation['recommendations'] as List?)
-                  ?.firstWhere((r) => r['name'] == name, orElse: () => {})['reason'];
+                  ?.firstWhere(
+                    (r) => r['name'] == name,
+                    orElse: () => {},
+                  )['reason'];
               match['ai_reason'] = aiReason;
               matchedRestaurants.add(Restaurant.fromJson(match));
             }
@@ -246,22 +264,30 @@ class AppProvider extends ChangeNotifier {
           // Use matched recommendations or fallback to top 5 nearby
           _restaurants = matchedRestaurants.isNotEmpty
               ? matchedRestaurants
-              : nearbyRestaurants.take(5).map((r) => Restaurant.fromJson(r)).toList();
+              : nearbyRestaurants
+                    .take(5)
+                    .map((r) => Restaurant.fromJson(r))
+                    .toList();
 
           _chatMessages.removeLast();
-          _chatMessages.add(ChatMessage.assistant(
-            recommendation['message'] ?? 'Here are some recommendations for you!',
-            recommendations: _restaurants,
-          ));
+          _chatMessages.add(
+            ChatMessage.assistant(
+              recommendation['message'] ??
+                  'Here are some recommendations for you!',
+              recommendations: _restaurants,
+            ),
+          );
         }
       }
     } catch (e) {
       _chatMessages.removeLast();
-      _chatMessages.add(ChatMessage.assistant(
-        _locale.languageCode == 'ko'
-            ? '죄송합니다. 오류가 발생했습니다: $e'
-            : 'Sorry, an error occurred: $e',
-      ));
+      _chatMessages.add(
+        ChatMessage.assistant(
+          _locale.languageCode == 'ko'
+              ? '죄송합니다. 오류가 발생했습니다: $e'
+              : 'Sorry, an error occurred: $e',
+        ),
+      );
     } finally {
       _isLoading = false;
     }
@@ -289,8 +315,15 @@ class AppProvider extends ChangeNotifier {
 
   /// Searches for restaurants by text query.
   Future<void> searchRestaurants(String query) async {
-    if (_currentPosition == null) return;
-
+    _error = null;
+    _restaurants = [];
+    if (_currentPosition == null) {
+      _error = _locale.languageCode == 'ko'
+          ? '먼저 위치를 설정해 주세요.'
+          : 'Set your location before searching for restaurants.';
+      notifyListeners();
+      return;
+    }
     _isLoading = true;
     notifyListeners();
 
@@ -299,6 +332,9 @@ class AppProvider extends ChangeNotifier {
         query: query,
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
+        radius: _filterOptions.maxDistance != null
+            ? (_filterOptions.maxDistance! * 1000).toInt()
+            : 5000,
       );
     } catch (e) {
       _error = e.toString();
@@ -313,11 +349,13 @@ class AppProvider extends ChangeNotifier {
     _chatMessages.clear();
     _geminiService.resetChat();
     // Re-add welcome message
-    _chatMessages.add(ChatMessage.system(
-      _locale.languageCode == 'ko'
-          ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
-          : "Hi! I'm Momukji, your food concierge. What are you in the mood to eat today?",
-    ));
+    _chatMessages.add(
+      ChatMessage.system(
+        _locale.languageCode == 'ko'
+            ? '안녕하세요! 모먹지입니다. 오늘 뭐 먹을지 고민이세요? 말씀해 주세요!'
+            : "Hi! I'm Momukji, your food concierge. What are you in the mood to eat today?",
+      ),
+    );
     notifyListeners();
   }
 
