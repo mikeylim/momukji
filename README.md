@@ -9,12 +9,12 @@ An AI-powered food and restaurant recommendation app built with Flutter. "Momukj
 - Bilingual support (English & Korean)
 - Quick Pick mode with mood and cuisine selection
 - Spin a cuisine, choose a cuisine, or spin a dish from a complete set of
-  15 named dishes per category (270 across 18 cuisines and food categories)
+  20 named dishes per category (360 across 18 cuisines and food categories)
 - Advanced filtering options (cuisine type, food type, dietary restrictions, price range, etc.)
 - Interactive chat interface for personalized recommendations
 
 The dish catalog is available in English and Korean. "All cuisines" chooses
-one category at random and displays all 15 of its dishes; every category has
+one category at random and displays all 20 of its dishes; every category has
 the same chance, so every dish has the same chance. The list below the wheel
 maps each numbered slice to a full dish name. See [catalog source notes](docs/menu-catalog.md)
 for representative food-guide and restaurant-menu references. A restaurant

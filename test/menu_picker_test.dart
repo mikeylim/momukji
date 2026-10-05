@@ -8,7 +8,7 @@ import 'package:momukji/widgets/spin_wheel.dart';
 void main() {
   test('the catalog offers varied choices from every cuisine', () {
     expect(MenuCatalog.cuisines, hasLength(18));
-    expect(MenuCatalog.allDishes, hasLength(270));
+    expect(MenuCatalog.allDishes, hasLength(360));
 
     for (final cuisine in MenuCatalog.cuisines) {
       expect(cuisine.dishes, hasLength(MenuCatalog.dishesPerCuisine));
@@ -24,7 +24,7 @@ void main() {
 
     expect(
       MenuCatalog.allDishes.map((pick) => pick.searchQuery).toSet(),
-      hasLength(270),
+      hasLength(360),
     );
   });
 
@@ -48,7 +48,7 @@ void main() {
     expect(provider.restaurants, isEmpty);
   });
 
-  testWidgets('the dish wheel includes all fifteen choices', (tester) async {
+  testWidgets('the dish wheel includes all twenty choices', (tester) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(() {
@@ -70,10 +70,10 @@ void main() {
     final wheel = tester.widget<SpinWheel>(find.byType(SpinWheel));
     expect(wheel.items, hasLength(MenuCatalog.dishesPerCuisine));
     expect(wheel.items.first.wheelLabel, '1');
-    expect(wheel.items.last.wheelLabel, '15');
+    expect(wheel.items.last.wheelLabel, '20');
     expect(find.byType(Chip), findsNWidgets(MenuCatalog.dishesPerCuisine));
     expect(
-      find.textContaining('15 dishes in each of 18 categories'),
+      find.textContaining('20 dishes in each of 18 categories'),
       findsOneWidget,
     );
 

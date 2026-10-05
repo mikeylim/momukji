@@ -40,7 +40,7 @@ class MenuPick {
 /// Each category has the same number of real, named dishes. A random cuisine
 /// followed by a random dish therefore gives every catalog entry equal odds.
 class MenuCatalog {
-  static const int dishesPerCuisine = 15;
+  static const int dishesPerCuisine = 20;
 
   static const cuisines = <MenuCuisine>[
     MenuCuisine('Korean', '한식', Icons.rice_bowl, [
@@ -59,6 +59,11 @@ class MenuCatalog {
       MenuDish('Dakgalbi', '닭갈비'),
       MenuDish('Samgyetang', '삼계탕'),
       MenuDish('Yukgaejang', '육개장'),
+      MenuDish('Seolleongtang', '설렁탕'),
+      MenuDish('Galbitang', '갈비탕'),
+      MenuDish('Bossam', '보쌈'),
+      MenuDish('Kongguksu', '콩국수'),
+      MenuDish('Haemultang', '해물탕'),
     ]),
     MenuCuisine('Japanese', '일식', Icons.set_meal, [
       MenuDish('Sushi', '초밥'),
@@ -76,6 +81,11 @@ class MenuCatalog {
       MenuDish('Gyoza', '교자'),
       MenuDish('Karaage', '가라아게'),
       MenuDish('Yakisoba', '야키소바'),
+      MenuDish('Omurice', '오므라이스'),
+      MenuDish('Japanese Curry Rice', '일본식 카레라이스'),
+      MenuDish('Korokke', '고로케'),
+      MenuDish('Oden', '오뎅'),
+      MenuDish('Yakiniku', '야키니쿠'),
     ]),
     MenuCuisine('Chinese', '중식', Icons.ramen_dining, [
       MenuDish('Dim Sum', '딤섬'),
@@ -93,6 +103,11 @@ class MenuCatalog {
       MenuDish('Sweet and Sour Pork', '탕수육'),
       MenuDish('Twice-Cooked Pork', '후이궈러우'),
       MenuDish('Dongpo Pork', '동파육'),
+      MenuDish('Beef Chow Fun', '소고기 차우펀'),
+      MenuDish('Fish Fillet Congee', '생선살 죽'),
+      MenuDish('Vegetable Spring Rolls', '야채 춘권'),
+      MenuDish('Clay Pot Rice', '바오짜이판'),
+      MenuDish('Fish-Fragrant Shredded Pork', '위샹러우쓰'),
     ]),
     MenuCuisine('Vietnamese', '베트남', Icons.soup_kitchen, [
       MenuDish('Pho', '쌀국수'),
@@ -110,6 +125,11 @@ class MenuCatalog {
       MenuDish('Mi Quang', '미꽝'),
       MenuDish('Cao Lau', '까오러우'),
       MenuDish('Banh Khot', '반콧'),
+      MenuDish('Com Ga', '껌가'),
+      MenuDish('Banh Beo', '반베오'),
+      MenuDish('Bun Rieu', '분리에우'),
+      MenuDish('Banh Can', '반깐'),
+      MenuDish('Bun Cha Ca', '분짜까'),
     ]),
     MenuCuisine('Thai', '태국', Icons.local_dining, [
       MenuDish('Pad Thai', '팟타이'),
@@ -127,6 +147,11 @@ class MenuCatalog {
       MenuDish('Khao Man Gai', '카오만가이'),
       MenuDish('Larb', '랍'),
       MenuDish('Tom Kha Gai', '똠카가이'),
+      MenuDish('Pad Kee Mao', '팟키마오'),
+      MenuDish('Gai Yang', '까이양'),
+      MenuDish('Khao Pad', '카오팟'),
+      MenuDish('Chicken Satay', '치킨 사테'),
+      MenuDish('Gai Pad Med Mamuang', '까이팟멧마무앙'),
     ]),
     MenuCuisine('Indian', '인도', Icons.restaurant, [
       MenuDish('Butter Chicken', '버터 치킨'),
@@ -144,6 +169,11 @@ class MenuCatalog {
       MenuDish('Aloo Gobi', '알루 고비'),
       MenuDish('Idli', '이들리'),
       MenuDish('Pani Puri', '파니 푸리'),
+      MenuDish('Chole Bhature', '촐레 바투레'),
+      MenuDish('Paneer Tikka', '파니르 티카'),
+      MenuDish('Aloo Tikki', '알루 티키'),
+      MenuDish('Rajma Chawal', '라즈마 차왈'),
+      MenuDish('Amritsari Kulcha', '암리차리 쿨차'),
     ]),
     MenuCuisine('Italian', '이탈리아', Icons.local_pizza, [
       MenuDish('Margherita Pizza', '마르게리타 피자'),
@@ -161,6 +191,11 @@ class MenuCatalog {
       MenuDish('Cacio e Pepe', '카초 에 페페'),
       MenuDish('Bucatini all Amatriciana', '부카티니 아마트리치아나'),
       MenuDish('Gnocchi alla Sorrentina', '뇨키 알라 소렌티나'),
+      MenuDish('Parmigiana di Melanzane', '파르미자나 디 멜란자네'),
+      MenuDish('Tortellini in Brodo', '토르텔리니 인 브로도'),
+      MenuDish('Tagliatelle al Ragu', '탈리아텔레 알 라구'),
+      MenuDish('Pasta con le Sarde', '파스타 콘 레 사르데'),
+      MenuDish('Caponata', '카포나타'),
     ]),
     MenuCuisine('Mexican', '멕시코', Icons.lunch_dining, [
       MenuDish('Tacos al Pastor', '타코 알 파스토르'),
@@ -178,6 +213,11 @@ class MenuCatalog {
       MenuDish('Sopes', '소페스'),
       MenuDish('Tlacoyos', '틀라코요스'),
       MenuDish('Torta Ahogada', '토르타 아오가다'),
+      MenuDish('Cochinita Pibil', '코치니타 피빌'),
+      MenuDish('Salbutes', '살부테스'),
+      MenuDish('Panuchos', '파누초스'),
+      MenuDish('Sopa de Lima', '소파 데 리마'),
+      MenuDish('Papadzules', '파파술레스'),
     ]),
     MenuCuisine('Greek', '그리스', Icons.kebab_dining, [
       MenuDish('Gyros', '기로스'),
@@ -195,6 +235,11 @@ class MenuCatalog {
       MenuDish('Saganaki', '사가나키'),
       MenuDish('Fasolada', '파솔라다'),
       MenuDish('Avgolemono', '아브골레모노'),
+      MenuDish('Stifado', '스티파도'),
+      MenuDish('Revithada', '레비타다'),
+      MenuDish('Santorini Fava', '산토리니 파바'),
+      MenuDish('Skordalia', '스코르달리아'),
+      MenuDish('Tzatziki', '차지키'),
     ]),
     MenuCuisine('Middle Eastern', '중동', Icons.kebab_dining, [
       MenuDish('Shawarma', '샤와르마'),
@@ -212,6 +257,11 @@ class MenuCatalog {
       MenuDish('Baba Ghanoush', '바바 가누쉬'),
       MenuDish('Mujadara', '무자다라'),
       MenuDish('Musakhan', '무사칸'),
+      MenuDish('Foul Medames', '풀 메다메스'),
+      MenuDish('Koshari', '코샤리'),
+      MenuDish('Kabsa', '캅사'),
+      MenuDish('Arayes', '아라예스'),
+      MenuDish('Shakshuka', '샥슈카'),
     ]),
     MenuCuisine('American', '미국', Icons.lunch_dining, [
       MenuDish('Cheeseburger', '치즈버거'),
@@ -229,6 +279,11 @@ class MenuCatalog {
       MenuDish('Jambalaya', '잠발라야'),
       MenuDish('Shrimp and Grits', '새우 앤 그리츠'),
       MenuDish('Meatloaf', '미트로프'),
+      MenuDish('Country Fried Steak', '컨트리 프라이드 스테이크'),
+      MenuDish('Biscuits and Gravy', '비스킷 앤 그레이비'),
+      MenuDish('Fried Catfish', '메기 튀김'),
+      MenuDish('Chicken and Dumplings', '치킨 앤 덤플링'),
+      MenuDish('Peach Cobbler', '피치 코블러'),
     ]),
     MenuCuisine('French', '프랑스', Icons.bakery_dining, [
       MenuDish('Croque Monsieur', '크로크 무슈'),
@@ -246,6 +301,11 @@ class MenuCatalog {
       MenuDish('Cassoulet', '카술레'),
       MenuDish('Bouillabaisse', '부야베스'),
       MenuDish('Blanquette de Veau', '블랑케트 드 보'),
+      MenuDish('Pot-au-Feu', '포토푀'),
+      MenuDish('Tartiflette', '타르티플레트'),
+      MenuDish('Galette Complete', '갈레트 콩플레트'),
+      MenuDish('Socca', '소카'),
+      MenuDish('Pissaladiere', '피살라디에르'),
     ]),
     MenuCuisine('Spanish', '스페인', Icons.tapas, [
       MenuDish('Paella', '파에야'),
@@ -263,6 +323,11 @@ class MenuCatalog {
       MenuDish('Cocido Madrileno', '코시도 마드릴레뇨'),
       MenuDish('Bacalao al Pil Pil', '바칼라오 알 필필'),
       MenuDish('Salmorejo', '살모레호'),
+      MenuDish('Migas', '미가스'),
+      MenuDish('Huevos Rotos', '우에보스 로토스'),
+      MenuDish('Pescaito Frito', '페스카이토 프리토'),
+      MenuDish('Ensaladilla Rusa', '엔살라디야 루사'),
+      MenuDish('Tortillita de Camarones', '토르티이타 데 카마로네스'),
     ]),
     MenuCuisine('Canadian', '캐나다', Icons.local_dining, [
       MenuDish('Poutine', '푸틴'),
@@ -280,6 +345,11 @@ class MenuCatalog {
       MenuDish('Split Pea Soup', '완두콩 수프'),
       MenuDish('Pouding Chomeur', '푸딩 쇼뫼르'),
       MenuDish('Sugar Pie', '슈거 파이'),
+      MenuDish('Rappie Pie', '래피 파이'),
+      MenuDish('Blueberry Grunt', '블루베리 그런트'),
+      MenuDish('Seafood Chowder', '해산물 차우더'),
+      MenuDish('Pan-Fried Pickerel', '피커럴 생선구이'),
+      MenuDish('Bison Stew', '바이슨 스튜'),
     ]),
     MenuCuisine('Caribbean', '카리브해', Icons.restaurant, [
       MenuDish('Jerk Chicken', '저크 치킨'),
@@ -297,6 +367,11 @@ class MenuCatalog {
       MenuDish('Cou Cou and Flying Fish', '쿠쿠와 날치'),
       MenuDish('Pudding and Souse', '푸딩 앤 사우스'),
       MenuDish('Escovitch Fish', '에스코비치 생선'),
+      MenuDish('Stew Peas', '스튜 피스'),
+      MenuDish('Mackerel Rundown', '고등어 런다운'),
+      MenuDish('Pepperpot Soup', '페퍼팟 수프'),
+      MenuDish('Macaroni Pie', '마카로니 파이'),
+      MenuDish('Bajan Fish Cakes', '바베이도스 피시 케이크'),
     ]),
     MenuCuisine('Ethiopian', '에티오피아', Icons.restaurant, [
       MenuDish('Doro Wat', '도로 왓'),
@@ -314,6 +389,11 @@ class MenuCatalog {
       MenuDish('Kik Alicha', '키크 알리차'),
       MenuDish('Key Wat', '케이 왓'),
       MenuDish('Fasolia', '파솔리아'),
+      MenuDish('Quanta Firfir', '콴타 피르피르'),
+      MenuDish('Shekla Tibs', '셰클라 팁스'),
+      MenuDish('Awaze Tibs', '아와제 팁스'),
+      MenuDish('Dulet', '둘렛'),
+      MenuDish('Gomen Besega', '고멘 베세가'),
     ]),
     MenuCuisine('Fast Food', '패스트푸드', Icons.fastfood, [
       MenuDish('Cheeseburger', '치즈버거'),
@@ -331,6 +411,11 @@ class MenuCatalog {
       MenuDish('Chicken Tenders', '치킨 텐더'),
       MenuDish('Mozzarella Sticks', '모차렐라 스틱'),
       MenuDish('Onion Rings', '어니언 링'),
+      MenuDish('Chicken Fries', '치킨 프라이'),
+      MenuDish('Soft Taco', '소프트 타코'),
+      MenuDish('Chicken Quesadilla', '치킨 케사디야'),
+      MenuDish('Corn Dog', '콘도그'),
+      MenuDish('French Fries', '감자튀김'),
     ]),
     MenuCuisine('Desserts', '디저트', Icons.icecream, [
       MenuDish('Gelato', '젤라토'),
@@ -348,6 +433,11 @@ class MenuCatalog {
       MenuDish('Tres Leches Cake', '트레스 레체스 케이크'),
       MenuDish('Cannoli', '카놀리'),
       MenuDish('Flan', '플란'),
+      MenuDish('Chocolate Mousse', '초콜릿 무스'),
+      MenuDish('Gulab Jamun', '굴랍 자문'),
+      MenuDish('Kulfi', '쿨피'),
+      MenuDish('Pecan Pie', '피칸 파이'),
+      MenuDish('Brownie', '브라우니'),
     ]),
   ];
 
